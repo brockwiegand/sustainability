@@ -94,7 +94,7 @@ select.chart-select{background:var(--card);color:var(--text);border:1px solid va
 <button class="tab-btn active" onclick="switchTab('workout')"><svg viewBox="0 0 24 24"><path d="M20.57 14.86L22 13.43 20.57 12 17 15.57 8.43 7 12 3.43 10.57 2 9.14 3.43 7.71 2 5.57 4.14 4.14 2.71 2.71 4.14l1.43 1.43L2 7.71l1.43 1.43L2 10.57 3.43 12 7 8.43 15.57 17 12 20.57 13.43 22l1.43-1.43 1.43 1.43 2.14-2.14 1.43 1.43 1.43-1.43-1.43-1.43L22 16.29z"/></svg>Workout</button>
 <button class="tab-btn" onclick="switchTab('meals')"><svg viewBox="0 0 24 24"><path d="M8.1 13.34l2.83-2.83L3.91 3.5c-1.56 1.56-1.56 4.09 0 5.66l4.19 4.18zm6.78-1.81c1.53.71 3.68.21 5.27-1.38 1.91-1.91 2.28-4.65.81-6.12-1.46-1.46-4.2-1.1-6.12.81-1.59 1.59-2.09 3.74-1.38 5.27L3.7 19.87l1.41 1.41L12 14.41l6.88 6.88 1.41-1.41L13.41 13l1.47-1.47z"/></svg>Meals</button>
 <button class="tab-btn" onclick="switchTab('progress')"><svg viewBox="0 0 24 24"><path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"/></svg>Progress</button>
-<button class="tab-btn" onclick="switchTab('water')"><svg viewBox="0 0 24 24"><path d="M12 2c-5.33 4.55-8 8.48-8 11.8 0 4.98 3.8 8.2 8 8.2s8-3.22 8-8.2C20 10.48 17.33 6.55 12 2z"/></svg>Water</button>
+<button class="tab-btn" onclick="switchTab('vision')"><svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zm0 12.5c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>Vision</button>
 <button class="tab-btn" onclick="switchTab('library')"><svg viewBox="0 0 24 24"><path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-1 9H9V9h10v2zm-4 4H9v-2h6v2zm4-8H9V5h10v2z"/></svg>Library</button>
 <button class="tab-btn" onclick="switchTab('habits')"><svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-9 14l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>Habits</button>
 </nav>
@@ -394,8 +394,8 @@ function drawLine(id,pts,yKey,color,unit){
   if(pts.length<=20){ctx.fillStyle='#9E9E9E';ctx.font='9px sans-serif';ctx.textAlign='center';pts.forEach((p,i)=>{ctx.fillText(p.label,pad+step*i,h-bp+12)})}},50)}
 
 // ═══════════ TABS ═══════════
-function switchTab(t){cTab=t;document.querySelectorAll('.tab-btn').forEach((b,i)=>{b.classList.toggle('active',['workout','meals','progress','water','library','habits'][i]===t)});render()}
-function render(){const a=document.getElementById('app');a.scrollTop=0;({workout:rWork,meals:rMeals,progress:rProg,water:rWater,library:rLibrary,habits:rHabits})[cTab](a)}
+function switchTab(t){cTab=t;document.querySelectorAll('.tab-btn').forEach((b,i)=>{b.classList.toggle('active',['workout','meals','progress','vision','library','habits'][i]===t)});render()}
+function render(){const a=document.getElementById('app');a.scrollTop=0;({workout:rWork,meals:rMeals,progress:rProg,vision:rVision,library:rLibrary,habits:rHabits})[cTab](a)}
 
 // ═══════════ WORKOUT (Program | Templates) ═══════════
 function setWMode(m){S.set('workoutMode',m);render()}
@@ -704,13 +704,18 @@ function rProg(el){
 }
 
 // ═══════════ WATER ═══════════
-function rWater(el){
-  const hyd=S.get('hyd_'+td(),0);const pct=Math.min(100,Math.round(hyd/128*100));
-  const labels=[],vals=[];const d=new Date();for(let i=13;i>=0;i--){const dt=new Date(d);dt.setDate(dt.getDate()-i);const ds=dt.toISOString().slice(0,10);labels.push(ds.slice(5));vals.push(S.get('hyd_'+ds,0))}
-  let h=`<h1>Hydration</h1><div class="card" style="text-align:center"><div class="water-display">${hyd} <span style="font-size:24px">oz</span></div><div class="progress-bar" style="height:14px;margin:8px 20px"><div class="progress-fill" style="width:${pct}%;background:var(--accent)"></div></div><div class="water-goal">${pct}% of 128 oz daily goal</div><div class="water-btns"><button class="btn btn-outline" onclick="addH2O(-16)">- 16 oz</button><button class="btn btn-primary" onclick="addH2O(16)">+ 16 oz</button><button class="btn btn-primary" onclick="addH2O(32)">+ 32 oz</button></div></div>`;
-  h+=`<h2>Last 14 Days</h2><div class="card"><canvas id="h2oChart"></canvas></div>`;
+function waterSectionHTML(){
+  var hyd=S.get('hyd_'+td(),0);var pct=Math.min(100,Math.round(hyd/128*100));
+  var h='<h2 style="margin-top:24px">Hydration</h2><div class="card" style="text-align:center"><div class="water-display">'+hyd+' <span style="font-size:24px">oz</span></div><div class="progress-bar" style="height:14px;margin:8px 20px"><div class="progress-fill" style="width:'+pct+'%;background:var(--accent)"></div></div><div class="water-goal">'+pct+'% of 128 oz daily goal</div><div class="water-btns"><button class="btn btn-outline" onclick="addH2O(-16)">- 16 oz</button><button class="btn btn-primary" onclick="addH2O(16)">+ 16 oz</button><button class="btn btn-primary" onclick="addH2O(32)">+ 32 oz</button></div></div>';
+  h+='<div class="card"><div style="font-size:12px;color:var(--text2);margin-bottom:4px">Last 14 days</div><canvas id="h2oChart"></canvas></div>';
   h+='<h2>Body Weight</h2>';
-  h+='<div class="card"><div class="flex gap8"><input class="input" type="number" inputmode="decimal" id="bwInput" value="'+(S.get('bw_'+td(),'')||'')+'" placeholder="Today\'s weight (lbs)" style="flex:1;margin:0"><button class="btn btn-primary" onclick="saveBW()">Log</button></div></div>';
+  h+='<div class="card"><div class="flex gap8"><input class="input" type="number" inputmode="decimal" id="bwInput" value="'+(S.get('bw_'+td(),'')||'')+'" placeholder="Weight today (lbs)" style="flex:1;margin:0"><button class="btn btn-primary" onclick="saveBW()">Log</button></div></div>';
+  h+='<div class="card"><div style="font-size:12px;color:var(--text2);margin-bottom:4px">Body weight - week over week (lbs)</div><canvas id="bwChart"></canvas></div>';
+  return h;
+}
+function drawWaterCharts(){
+  var labels=[],vals=[];var d=new Date();for(var i=13;i>=0;i--){var dt=new Date(d);dt.setDate(dt.getDate()-i);var ds=dt.toISOString().slice(0,10);labels.push(ds.slice(5));vals.push(S.get('hyd_'+ds,0))}
+  drawBar('h2oChart',labels,vals,'#4FC3F7',160);
   var launch=S.get('launchDate',td());var bwWeeks=[],bwWeekLabels=[];
   var totalWeeks=Math.ceil((dBet(launch,td())+1)/7);
   for(var bww=0;bww<totalWeeks;bww++){
@@ -722,9 +727,15 @@ function rWater(el){
     }
     if(weekVals.length>0){var avg=Math.round(weekVals.reduce(function(a,b){return a+b},0)/weekVals.length*10)/10;bwWeeks.push(avg);bwWeekLabels.push('Wk'+(bww+1))}
   }
-  h+='<div class="card"><div style="font-size:12px;color:var(--text2);margin-bottom:4px">Body weight - week over week (lbs)</div><canvas id="bwChart"></canvas></div>';
-  el.innerHTML=h;drawBar('h2oChart',labels,vals,'#4FC3F7',160);
   drawLine('bwChart',bwWeeks.map(function(v,i){return{val:v,label:bwWeekLabels[i]}}),'val','#AB47BC',' lbs');
+}
+function rVision(el){
+  var v=S.get('vision','');
+  var h='<h1>Vision</h1>';
+  h+='<div style="font-size:12px;color:var(--text2);margin-bottom:8px">Your vision, goals, and notes \u2014 saved automatically.</div>';
+  h+='<textarea class="input" id="visionText" oninput="S.set(\'vision\',this.value)" placeholder="Write your vision here..." style="width:100%;min-height:62vh;line-height:1.55;font-size:14px"></textarea>';
+  el.innerHTML=h;
+  var ta=document.getElementById('visionText');if(ta)ta.value=v;
 }
 function addH2O(oz){var cur=S.get('hyd_'+td(),0);cur=Math.max(0,cur+oz);S.set('hyd_'+td(),cur);render()}
 
@@ -909,6 +920,7 @@ function rHabits(el){
       });
     }
   }
+  h+=waterSectionHTML();
   el.innerHTML=h;
   active.forEach(function(hab){
     var i=hab._idx;var chartData=getHabitChartData(hab);
@@ -916,6 +928,7 @@ function rHabits(el){
       drawBar('habChart'+i,chartData.labels,chartData.values,'#4FC3F7',100);
     }
   });
+  drawWaterCharts();
 }
 function archiveHabit(i){var habits=S.get('habits',[]);if(habits[i]){habits[i].archived=true;S.set('habits',habits);render()}}
 function unarchiveHabit(i){var habits=S.get('habits',[]);if(habits[i]){habits[i].archived=false;S.set('habits',habits);render()}}
