@@ -11,11 +11,13 @@
 :root{--bg:#121212;--card:#1E1E1E;--card2:#252525;--accent:#4FC3F7;--green:#66BB6A;--red:#EF5350;--yellow:#FFD54F;--purple:#AB47BC;--text:#E0E0E0;--text2:#9E9E9E;--border:#333;--tab-bg:#1A1A1A;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 body{background:var(--bg);color:var(--text);overflow:hidden;height:100vh;height:100dvh;position:fixed;width:100%}
-#app{height:calc(100vh - 56px);height:calc(100dvh - 56px);overflow-y:auto;-webkit-overflow-scrolling:touch;padding:12px 12px 20px}
+#app{height:calc(100vh - 52px);height:calc(100dvh - 52px - env(safe-area-inset-top));margin-top:calc(52px + env(safe-area-inset-top));overflow-y:auto;-webkit-overflow-scrolling:touch;padding:12px 12px 24px}
 nav#tabbar{position:fixed;bottom:0;left:0;right:0;height:56px;background:var(--tab-bg);display:flex;border-top:1px solid var(--border);z-index:100;padding-bottom:env(safe-area-inset-bottom)}
-.tab-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--text2);font-size:9px;gap:1px;border:none;background:none;cursor:pointer;transition:.2s;padding:0 2px}
+.tab-btn{position:relative;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--text2);font-size:9px;gap:1px;border:none;background:none;cursor:pointer;transition:.2s;padding:0 2px}
 .tab-btn.active{color:var(--accent)}
 .tab-btn svg{width:20px;height:20px;fill:currentColor}
+.tab-badge{position:absolute;top:5px;left:50%;margin-left:6px;min-width:15px;height:15px;background:var(--red);color:#fff;border-radius:8px;font-size:9px;font-weight:700;line-height:15px;text-align:center;display:none;padding:0 3px}
+.tab-badge.show{display:block}
 h1{font-size:20px;font-weight:700;margin-bottom:12px;color:#fff}
 h2{font-size:16px;font-weight:600;margin:16px 0 8px;color:var(--accent)}
 h3{font-size:13px;font-weight:600;color:var(--text2);margin:12px 0 6px;text-transform:uppercase;letter-spacing:.5px}
@@ -86,18 +88,27 @@ select.chart-select{background:var(--card);color:var(--text);border:1px solid va
 .session-timer{background:var(--card2);border-radius:8px;padding:8px 14px;font-size:13px;color:var(--accent);font-variant-numeric:tabular-nums;text-align:center;margin-bottom:12px}
 .backup-banner{background:rgba(255,213,84,.15);border:1px solid rgba(255,213,84,.3);border-radius:10px;padding:10px 14px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;gap:8px}
 .backup-banner .bb-text{font-size:12px;color:#FFD54F}.backup-banner .bb-btn{white-space:nowrap}
+#topbar{position:fixed;top:0;left:0;right:0;height:calc(52px + env(safe-area-inset-top));padding:env(safe-area-inset-top) 14px 0 14px;background:var(--tab-bg);display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border);z-index:120}
+#topbar .hb{position:relative;width:38px;height:38px;display:flex;align-items:center;justify-content:center;background:none;border:none;cursor:pointer;color:var(--text);margin-left:-6px;padding:0}
+#topbar .hb svg{width:24px;height:24px;fill:currentColor}
+#topbar .title{font-size:16px;font-weight:700;color:#fff}
+.hb-dot{position:absolute;top:6px;right:3px;width:9px;height:9px;border-radius:50%;background:var(--red);display:none}
+.hb-dot.show{display:block}
+#menu{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;z-index:210}
+#menu.show{display:block}
+#menu .drawer{position:absolute;top:0;left:0;bottom:0;width:80%;max-width:300px;background:var(--card);padding:calc(14px + env(safe-area-inset-top)) 12px 14px;overflow-y:auto;box-shadow:2px 0 16px rgba(0,0,0,.5);display:flex;flex-direction:column;gap:2px}
+.menu-head{font-size:18px;font-weight:700;color:var(--accent);padding:6px 12px 14px}
+.menu-item{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 12px;border-radius:10px;color:var(--text);cursor:pointer;font-size:15px;font-weight:600}
+.menu-item.active{background:var(--card2);color:var(--accent)}
+.menu-div{height:1px;background:var(--border);margin:10px 4px}
+.mi-badge{min-width:20px;height:20px;line-height:20px;text-align:center;background:var(--red);color:#fff;border-radius:10px;font-size:11px;font-weight:700;padding:0 6px}
 </style>
 </head>
 <body>
+<header id="topbar"><button class="hb" onclick="openMenu()" aria-label="Open menu"><svg viewBox="0 0 24 24"><path d="M3 6h18v2H3zM3 11h18v2H3zM3 16h18v2H3z"/></svg><span id="hbDot" class="hb-dot"></span></button><span class="title" id="topTitle">Sustainability</span></header>
 <div id="app"></div>
-<nav id="tabbar">
-<button class="tab-btn active" onclick="switchTab('workout')"><svg viewBox="0 0 24 24"><path d="M20.57 14.86L22 13.43 20.57 12 17 15.57 8.43 7 12 3.43 10.57 2 9.14 3.43 7.71 2 5.57 4.14 4.14 2.71 2.71 4.14l1.43 1.43L2 7.71l1.43 1.43L2 10.57 3.43 12 7 8.43 15.57 17 12 20.57 13.43 22l1.43-1.43 1.43 1.43 2.14-2.14 1.43 1.43 1.43-1.43-1.43-1.43L22 16.29z"/></svg>Workout</button>
-<button class="tab-btn" onclick="switchTab('meals')"><svg viewBox="0 0 24 24"><path d="M8.1 13.34l2.83-2.83L3.91 3.5c-1.56 1.56-1.56 4.09 0 5.66l4.19 4.18zm6.78-1.81c1.53.71 3.68.21 5.27-1.38 1.91-1.91 2.28-4.65.81-6.12-1.46-1.46-4.2-1.1-6.12.81-1.59 1.59-2.09 3.74-1.38 5.27L3.7 19.87l1.41 1.41L12 14.41l6.88 6.88 1.41-1.41L13.41 13l1.47-1.47z"/></svg>Meals</button>
-<button class="tab-btn" onclick="switchTab('progress')"><svg viewBox="0 0 24 24"><path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"/></svg>Progress</button>
-<button class="tab-btn" onclick="switchTab('vision')"><svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zm0 12.5c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>Vision</button>
-<button class="tab-btn" onclick="switchTab('library')"><svg viewBox="0 0 24 24"><path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-1 9H9V9h10v2zm-4 4H9v-2h6v2zm4-8H9V5h10v2z"/></svg>Library</button>
-<button class="tab-btn" onclick="switchTab('habits')"><svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-9 14l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>Habits</button>
-</nav>
+<div id="menu" onclick="closeMenu()"></div>
+
 <div class="timer-overlay" id="timerOverlay" onclick="dismissTimer()"><div class="timer-label" id="timerLabel">Rest</div><div class="timer-time" id="timerTime">0:00</div><div class="flex gap8" style="margin-top:18px" onclick="event.stopPropagation()"><button class="btn btn-sm btn-outline" onclick="restPreset(60)">60s</button><button class="btn btn-sm btn-outline" onclick="restPreset(90)">90s</button><button class="btn btn-sm btn-outline" onclick="restPreset(120)">120s</button><button class="btn btn-sm btn-outline" onclick="restPreset(180)">180s</button></div><p style="color:var(--text2);margin-top:18px;font-size:14px">Tap background to dismiss</p></div>
 <div class="modal" id="editModal"><div class="modal-content" id="emc"></div></div>
 <script>
@@ -410,8 +421,8 @@ function drawLine(id,pts,yKey,color,unit){
   if(pts.length<=20){ctx.fillStyle='#9E9E9E';ctx.font='9px sans-serif';ctx.textAlign='center';pts.forEach((p,i)=>{ctx.fillText(p.label,pad+step*i,h-bp+12)})}},50)}
 
 // ═══════════ TABS ═══════════
-function switchTab(t){cTab=t;document.querySelectorAll('.tab-btn').forEach((b,i)=>{b.classList.toggle('active',['workout','meals','progress','vision','library','habits'][i]===t)});render()}
-function render(){const a=document.getElementById('app');a.scrollTop=0;({workout:rWork,meals:rMeals,progress:rProg,vision:rVision,library:rLibrary,habits:rHabits})[cTab](a)}
+function switchTab(t){cTab=t;closeMenu();render()}
+function render(){var a=document.getElementById('app');a.scrollTop=0;var map={workout:rWork,meals:rMeals,progress:rProg,vision:rVision,library:rLibrary,habits:rHabits,tasks:rTasks,settings:rSettings,backup:rBackup};(map[cTab]||rWork)(a);var tt=document.getElementById('topTitle');if(tt)tt.textContent=({workout:'Workout',meals:'Meals',progress:'Progress',vision:'Vision',library:'Library',habits:'Habits',tasks:'Tasks',settings:'Settings',backup:'Backup'}[cTab]||'Sustainability');updateTaskBadge()}
 
 // ═══════════ WORKOUT (Program | Templates) ═══════════
 function setWMode(m){S.set('workoutMode',m);render()}
@@ -457,9 +468,8 @@ function rProgram(el){
   const w=cWeek,d=cDay,ph=PHASES[w-1]||'Maintenance',isDL=DELOAD.has(w),di=DAYS[d],wd=wG(w,d);
   const isTest=(w===27&&d==='B')||(w===25&&d==='A');
   let h='';
-  if(backupNeeded()){var lastExp=S.get('lastExport',null);var daysSince=lastExp?dBet(lastExp,td()):'never';h+='<div class="backup-banner"><div class="bb-text">Backup: '+(lastExp?daysSince+' days ago':'never')+'</div><div class="flex gap4"><button class="btn btn-sm btn-primary bb-btn" onclick="exportData()">Export</button><button class="btn btn-sm btn-outline bb-btn" onclick="emailBackup()">Email</button></div></div>';}
   h+=subTabsHTML('program');
-  h+=`<div class="flex between"><h1>Week ${w}</h1><button class="btn-icon" onclick="openSet()">⚙️</button></div>`;
+  h+=`<h1>Week ${w}</h1>`;
   h+=`<div class="flex gap8" style="margin-bottom:10px"><span class="pill ${isDL?'pill-yellow':isTest?'pill-red':'pill-blue'}">${ph}</span>${isDL?'<span class="pill pill-yellow">Deload</span>':''}${isTest?'<span class="pill pill-red">TEST</span>':''}</div>`;
   h+=sessionTimerHTML();
   h+=`<div class="week-sel"><button class="btn-icon" onclick="chgW(-1)">◀</button><select onchange="cWeek=+this.value;S.set('cWeek',cWeek);render()">`;
@@ -480,7 +490,7 @@ function rTemplates(el){
   const active=S.get('activeTSession',null);
   if(active){return rActiveTemplate(el,active)}
   const tpls=getTemplates();
-  h+=`<div class="flex between"><h1>Templates</h1><button class="btn-icon" onclick="openSet()">⚙️</button></div>`;
+  h+=`<h1>Templates</h1>`;
   h+=`<button class="btn btn-primary" onclick="createTemplate()" style="width:100%;margin-bottom:14px">+ Create Template</button>`;
   if(!tpls.length){
     h+=`<div class="empty-state"><p>No templates yet</p><p style="font-size:12px;margin-top:4px">Create one from your exercise library</p></div>`;
@@ -1084,6 +1094,163 @@ function deleteHabit(i){
   var hab=habits[i];
   if(hab)S.set('hab_'+hab.id,null);
   habits.splice(i,1);S.set('habits',habits);render();
+}
+
+// ═══════════ NAV MENU / SETTINGS / BACKUP ═══════════
+function openMenu(){renderMenu();document.getElementById('menu').classList.add('show')}
+function closeMenu(){var m=document.getElementById('menu');if(m)m.classList.remove('show')}
+function renderMenu(){
+  var items=[['workout','Workout'],['meals','Meals'],['progress','Progress'],['vision','Vision'],['library','Library'],['habits','Habits'],['tasks','Tasks']];
+  var today=td();var taskN=0;getTasks().forEach(function(t){if(t.done&&(!t.recur||t.recur==='none'))return;if(t.due&&t.due<=today)taskN++});
+  var h='<div class="drawer" onclick="event.stopPropagation()"><div class="menu-head">Sustainability</div>';
+  items.forEach(function(it){
+    var badge=(it[0]==='tasks'&&taskN>0)?'<span class="mi-badge">'+taskN+'</span>':'';
+    h+='<div class="menu-item '+(cTab===it[0]?'active':'')+'" onclick="switchTab(\''+it[0]+'\')"><span>'+it[1]+'</span>'+badge+'</div>';
+  });
+  h+='<div class="menu-div"></div>';
+  h+='<div class="menu-item '+(cTab==='backup'?'active':'')+'" onclick="switchTab(\'backup\')"><span>Backup</span>'+(backupNeeded()?'<span class="mi-badge" style="background:var(--yellow);color:#000">due</span>':'')+'</div>';
+  h+='<div class="menu-item '+(cTab==='settings'?'active':'')+'" onclick="switchTab(\'settings\')"><span>Settings</span></div>';
+  h+='</div>';
+  document.getElementById('menu').innerHTML=h;
+}
+function rSettings(el){
+  var h='<h1>Settings</h1>';
+  h+='<div class="card"><div class="flex between" style="padding:4px 0"><span>Current Week</span><div class="flex gap8"><button class="btn btn-sm btn-outline" onclick="cWeek=Math.max(1,cWeek-1);S.set(\'cWeek\',cWeek);render()">-</button><span style="min-width:40px;text-align:center;font-weight:600">'+cWeek+'</span><button class="btn btn-sm btn-outline" onclick="cWeek=Math.min(28,cWeek+1);S.set(\'cWeek\',cWeek);render()">+</button></div></div></div>';
+  h+='<div class="card"><div class="flex between"><span>Launch Date</span><span style="color:var(--accent)">'+S.get('launchDate',td())+'</span></div></div>';
+  h+='<div class="card"><div class="flex between"><span style="color:var(--red)">Reset All Data</span><button class="btn btn-sm btn-outline" style="color:var(--red)" onclick="if(confirm(\'Delete ALL data? This cannot be undone.\')){Object.keys(localStorage).filter(function(k){return k.startsWith(\'bt_\')}).forEach(function(k){localStorage.removeItem(k)});location.reload()}">Reset</button></div></div>';
+  el.innerHTML=h;
+}
+function rBackup(el){
+  var last=S.get('lastExport',null);var status=last?(dBet(last,td())+' days ago'):'never';
+  var h='<h1>Backup</h1>';
+  h+='<div class="card"><div style="font-size:13px">Last backup: <b style="color:'+(backupNeeded()?'var(--yellow)':'var(--green)')+'">'+status+'</b></div><div style="font-size:12px;color:var(--text2);margin-top:6px;line-height:1.5">Your data lives in this browser only. Export regularly so you can restore it if you clear Safari data or switch devices.</div></div>';
+  h+='<div class="card"><div class="flex between"><span>Export to file</span><button class="btn btn-sm btn-primary" onclick="exportData()">Export</button></div></div>';
+  h+='<div class="card"><div class="flex between"><span>Email backup</span><button class="btn btn-sm btn-primary" onclick="emailBackup()">Email</button></div></div>';
+  h+='<div class="card"><div class="flex between"><span>Import from file</span><button class="btn btn-sm btn-outline" onclick="document.getElementById(\'impFileB\').click()">Import</button><input type="file" id="impFileB" accept=".json" style="display:none" onchange="importData(this)"></div></div>';
+  el.innerHTML=h;
+}
+
+// ═══════════ TASKS (to-do) ═══════════
+function getTasks(){return S.get('tasks',[])}
+function saveTasks(t){S.set('tasks',t)}
+function cap(s){s=String(s||'');return s.charAt(0).toUpperCase()+s.slice(1)}
+function fmtDue(due){var d=new Date(due+'T00:00:00');var M=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];return M[d.getMonth()]+' '+d.getDate()}
+function taskStatus(t){
+  if(t.done&&(!t.recur||t.recur==='none'))return 'done';
+  if(!t.due)return 'anytime';
+  var today=td();
+  if(t.due<today)return 'overdue';
+  if(t.due===today)return 'today';
+  return 'upcoming';
+}
+function addTaskInterval(dateStr,recur){
+  var d=new Date(dateStr+'T00:00:00');
+  if(recur==='daily')d.setDate(d.getDate()+1);
+  else if(recur==='weekly')d.setDate(d.getDate()+7);
+  else if(recur==='monthly')d.setMonth(d.getMonth()+1);
+  else if(recur==='quarterly')d.setMonth(d.getMonth()+3);
+  else if(recur==='annually')d.setFullYear(d.getFullYear()+1);
+  return d.toISOString().slice(0,10);
+}
+function rTasks(el){
+  var tasks=getTasks();tasks.forEach(function(t,i){t._i=i});
+  var groups={overdue:[],today:[],upcoming:[],anytime:[],done:[]};
+  tasks.forEach(function(t){groups[taskStatus(t)].push(t)});
+  ['overdue','today','upcoming'].forEach(function(k){groups[k].sort(function(a,b){return a.due<b.due?-1:a.due>b.due?1:0})});
+  var h='<h1>Tasks</h1>';
+  h+='<button class="btn btn-primary" onclick="addTask()" style="width:100%;margin-bottom:14px">+ Add Task</button>';
+  [['overdue','Overdue'],['today','Due Today'],['upcoming','Upcoming'],['anytime','Anytime']].forEach(function(sec){
+    var list=groups[sec[0]];if(!list.length)return;
+    h+='<h3>'+sec[1]+'</h3>';list.forEach(function(t){h+=taskCard(t)});
+  });
+  if(groups.done.length){
+    var showD=S.get('showDoneTasks',false);
+    h+='<h3 style="margin-top:18px;cursor:pointer" onclick="S.set(\'showDoneTasks\','+(!showD)+');render()">Completed ('+groups.done.length+') '+(showD?'▾':'▸')+'</h3>';
+    if(showD)groups.done.forEach(function(t){h+=taskCard(t)});
+  }
+  if(!tasks.length)h+='<div class="empty-state"><p>No tasks yet</p><p style="font-size:12px;margin-top:4px">Add one to get started</p></div>';
+  el.innerHTML=h;
+}
+function taskCard(t){
+  var checked=t.done&&(!t.recur||t.recur==='none');
+  var st=taskStatus(t);
+  var duePill=t.due?('<span class="pill '+(st==='overdue'?'pill-red':st==='today'?'pill-yellow':'pill-blue')+'" style="font-size:10px;padding:2px 8px">'+(st==='overdue'?'Overdue · ':'')+fmtDue(t.due)+'</span>'):'';
+  var recurBadge=(t.recur&&t.recur!=='none')?'<span class="pill pill-purple" style="font-size:10px;padding:2px 8px">↻ '+cap(t.recur)+'</span>':'';
+  var h='<div class="card'+(checked?' done':'')+'">';
+  h+='<div class="flex between"><div class="flex gap8" style="flex:1;min-width:0;align-items:flex-start">';
+  h+='<div class="check'+(checked?' checked':'')+'" onclick="toggleTask('+t._i+')">'+(checked?'✓':'')+'</div>';
+  h+='<div style="flex:1;min-width:0"><div class="ex-name"'+(checked?' style="text-decoration:line-through;color:var(--text2)"':'')+'>'+escA(t.title)+'</div>';
+  if(t.notes)h+='<div style="font-size:11px;color:var(--text2);margin-top:2px">'+escA(t.notes)+'</div>';
+  if(duePill||recurBadge)h+='<div class="flex gap4" style="margin-top:5px;flex-wrap:wrap">'+duePill+recurBadge+'</div>';
+  h+='</div></div><div class="flex gap4">';
+  if(t.due)h+='<button class="btn-icon" onclick="taskCalendar('+t._i+')" title="Add to calendar" style="width:28px;height:28px;font-size:13px">📅</button>';
+  h+='<button class="btn-icon" onclick="editTask('+t._i+')" style="width:28px;height:28px;font-size:12px">✏️</button>';
+  h+='<button class="btn-icon" onclick="deleteTask('+t._i+')" style="width:28px;height:28px;font-size:12px;color:var(--red)">✕</button>';
+  h+='</div></div></div>';
+  return h;
+}
+function addTask(){openTaskForm(null)}
+function editTask(i){openTaskForm(i)}
+function openTaskForm(i){
+  var t=(i!==null)?getTasks()[i]:null;var mc=document.getElementById('emc');
+  var h='<h2 style="color:#fff">'+(t?'Edit Task':'New Task')+'</h2>';
+  h+='<input class="input" id="tkTitle" placeholder="Task" value="'+(t?escA(t.title):'')+'">';
+  h+='<input class="input" id="tkNotes" placeholder="Notes (optional)" value="'+(t?escA(t.notes||''):'')+'">';
+  h+='<div style="font-size:12px;color:var(--text2);margin:4px 0 2px">Due date (optional)</div>';
+  h+='<input class="input" id="tkDue" type="date" value="'+(t?escA(t.due||''):'')+'">';
+  h+='<div style="font-size:12px;color:var(--text2);margin:4px 0 2px">Repeat</div>';
+  h+='<select class="input" id="tkRecur">';
+  [['none','Does not repeat'],['daily','Daily'],['weekly','Weekly'],['monthly','Monthly'],['quarterly','Quarterly'],['annually','Annually']].forEach(function(o){h+='<option value="'+o[0]+'"'+(((t&&(t.recur||'none')===o[0])||(!t&&o[0]==='none'))?' selected':'')+'>'+o[1]+'</option>'});
+  h+='</select>';
+  h+='<div class="flex gap8" style="margin-top:12px"><button class="btn btn-primary" style="flex:1" onclick="saveTask('+(i!==null?i:'null')+')">Save</button><button class="btn btn-outline" style="flex:1" onclick="closeM()">Cancel</button></div>';
+  mc.innerHTML=h;document.getElementById('editModal').classList.add('show');
+}
+function saveTask(i){
+  var title=document.getElementById('tkTitle').value.trim();if(!title)return alert('Enter a task');
+  var notes=document.getElementById('tkNotes').value.trim();
+  var due=document.getElementById('tkDue').value||'';
+  var recur=document.getElementById('tkRecur').value;
+  var tasks=getTasks();
+  if(i!==null&&tasks[i]){tasks[i].title=title;tasks[i].notes=notes;tasks[i].due=due;tasks[i].recur=recur;}
+  else{tasks.push({id:'t'+Date.now(),title:title,notes:notes,due:due,recur:recur,done:false,created:td()});}
+  saveTasks(tasks);closeM();render();
+}
+function deleteTask(i){if(!confirm('Delete this task?'))return;var tasks=getTasks();tasks.splice(i,1);saveTasks(tasks);render();}
+function toggleTask(i){
+  var tasks=getTasks();var t=tasks[i];if(!t)return;
+  if(t.recur&&t.recur!=='none'){
+    var nd=t.due||td();var guard=0;do{nd=addTaskInterval(nd,t.recur);guard++}while(nd<=td()&&guard<500);
+    t.due=nd;t.done=false;
+  }else{t.done=!t.done;t.completedDate=t.done?td():''}
+  saveTasks(tasks);render();
+}
+function updateTaskBadge(){
+  var dot=document.getElementById('hbDot');if(!dot)return;
+  var today=td();var n=0;
+  getTasks().forEach(function(t){if(t.done&&(!t.recur||t.recur==='none'))return;if(t.due&&t.due<=today)n++});
+  if(n>0||backupNeeded())dot.classList.add('show');else dot.classList.remove('show');
+}
+function escICS(s){return String(s==null?'':s).replace(/\\/g,'\\\\').replace(/;/g,'\\;').replace(/,/g,'\\,').replace(/\n/g,'\\n')}
+function buildICS(t){
+  var dt=t.due.replace(/-/g,'');
+  var stamp=new Date().toISOString().replace(/[-:]/g,'').split('.')[0]+'Z';
+  var L=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Sustainability//Tasks//EN','CALSCALE:GREGORIAN','BEGIN:VEVENT','UID:task-'+t.id+'@sustainability','DTSTAMP:'+stamp,'DTSTART:'+dt+'T090000','DTEND:'+dt+'T093000','SUMMARY:'+escICS(t.title)];
+  if(t.notes)L.push('DESCRIPTION:'+escICS(t.notes));
+  var rmap={daily:'FREQ=DAILY',weekly:'FREQ=WEEKLY',monthly:'FREQ=MONTHLY',quarterly:'FREQ=MONTHLY;INTERVAL=3',annually:'FREQ=YEARLY'};
+  if(t.recur&&rmap[t.recur])L.push('RRULE:'+rmap[t.recur]);
+  L.push('BEGIN:VALARM','ACTION:DISPLAY','DESCRIPTION:'+escICS(t.title),'TRIGGER:PT0S','END:VALARM','END:VEVENT','END:VCALENDAR');
+  return L.join('\r\n');
+}
+function taskCalendar(i){
+  var t=getTasks()[i];if(!t)return;if(!t.due){alert('Add a due date first to set a calendar reminder.');return}
+  var ics=buildICS(t);
+  try{
+    var blob=new Blob([ics],{type:'text/calendar;charset=utf-8'});
+    var url=URL.createObjectURL(blob);
+    var a=document.createElement('a');a.href=url;a.download=(t.title.replace(/[^a-z0-9]/gi,'_').slice(0,40)||'task')+'.ics';
+    document.body.appendChild(a);a.click();document.body.removeChild(a);
+    setTimeout(function(){URL.revokeObjectURL(url)},2000);
+  }catch(e){window.location.href='data:text/calendar;charset=utf-8,'+encodeURIComponent(ics)}
 }
 
 // ============ PR DETECTION & CONFETTI ============
