@@ -104,7 +104,7 @@ select.chart-select{background:var(--card);color:var(--text);border:1px solid va
 
 const PHASES=["Foundation","Foundation","Foundation","Foundation","Base Building","Base Building","Base Building","Base Building","Strength I","Strength I","Strength I","Strength I","Strength II","Strength II","Strength II","Strength II","Peak I","Peak I","Peak I","Peak I","Peak II","Peak II","Peak II","Peak II","Test & Maintain","Test & Maintain","Test & Maintain","Maintenance"];
 const DELOAD=new Set([4,8,12,16,20,24]);
-const DAYS={A:{name:"Day A: Squat & Pull",ex:["Back Squat","Pull-ups","T-bar Row","DB Lunges","Calf Raises","Ab Wheel"]},B:{name:"Day B: Bench & Back",ex:["Bench Press","Pull-ups","Barbell Row","DB Chest Flys","Triceps Press","Russian Twists"]},C:{name:"Day C: Deadlift & Press",ex:["Deadlift","Overhead Press","Lat Pulldown","DB Lat Raises","Face Pulls","Hanging Leg Raise"]}};
+const DAYS={A:{name:"Day A: Squat & Pull",ex:["Back Squat","Pull-ups","T-bar Row","DB Lunges","Close-Grip Bench Press","Decline Weighted Sit-up"]},B:{name:"Day B: Bench & Back",ex:["Bench Press","Pull-ups","Barbell Row","DB Chest Flys","Triceps Press","Russian Twists"]},C:{name:"Day C: Legs & Press",ex:["Leg Press (Machine)","Overhead Press","Leg Curl (Machine)","Lat Pulldown","DB Lat Raises","Face Pulls","Hanging Leg Raise"]}};
 const P={
 "Back Squat":["3×8@175","3×8@180","3×8@185","3×6@165","4×6@185","4×6@190","4×6@195","3×6@175","4×5@200","4×5@205","4×5@210","3×5@190","4×4@215","4×4@220","4×4@225","3×4@200","4×3@230","4×3@235","4×3@240","3×3@215","3×3@245","3×3@250","3×2@255","3×3@225","3×5@225","3×5@230","3×5@225","3×5@215"],
 "Pull-ups_A":["3×max(7-9)","3×max(7-9)","3×max(7-9)","2×max","3×8","3×9","3×9","2×7","3×10","3×10","3×11","2×8","3×11","3×12","3×12","2×9","3×13","3×13","3×14","2×10","3×14","3×14","3×15","2×11","TEST:15!","3×12","3×12","3×12"],
@@ -116,17 +116,29 @@ const P={
 "Bench Press":["5×5@155","5×5@160","5×5@165","3×5@150","5×5@165","5×5@170","5×5@175","3×5@160","4×5@175","4×5@180","4×5@185","3×5@170","5×3@190","5×3@195","5×3@200","3×3@180","4×3@200","4×3@205","4×3@210","3×3@190","3×3@215","3×2@220","3×2@225","3×3@200","3×3@215","2×2@220","TEST:225×3!","3×5@185"],
 "Barbell Row":["3×10@115","3×10@120","3×10@125","3×8@110","3×10@125","3×10@130","3×10@135","3×8@115","4×8@135","4×8@140","4×8@145","3×8@125","4×6@150","4×6@155","4×6@160","3×6@140","4×6@160","4×6@165","4×6@170","3×6@150","3×6@170","3×6@175","3×6@180","3×8@155","3×8@155","3×8@160","3×8@155","3×8@150"],
 "DB Chest Flys":["3×12@20ea","3×12@20ea","3×12@25ea","3×10@15ea","3×12@25ea","3×12@25ea","3×12@30ea","3×10@20ea","3×10@30ea","3×10@30ea","3×10@35ea","3×8@25ea","3×10@35ea","3×10@35ea","3×10@40ea","3×8@30ea","3×8@40ea","3×8@40ea","3×8@45ea","3×8@35ea","3×8@45ea","3×8@45ea","3×8@50ea","3×8@40ea","3×10@35ea","3×10@35ea","3×10@35ea","3×10@30ea"],
-"Triceps Press":["3×12@40","3×12@40","3×12@45","3×10@35","3×12@45","3×12@50","3×12@50","3×10@40","3×10@55","3×10@55","3×10@60","3×8@45","3×10@60","3×10@65","3×10@65","3×8@50","3×8@70","3×8@70","3×8@75","3×8@60","3×8@75","3×8@80","3×8@80","3×8@65","3×10@60","3×10@60","3×10@60","3×10@55"],
+"Triceps Press":["4×12@40", "4×12@40", "4×12@45", "3×10@35", "4×12@45", "4×12@50", "4×12@50", "3×10@40", "4×10@55", "4×10@55", "4×10@60", "3×8@45", "4×10@60", "4×10@65", "4×10@65", "3×8@50", "4×8@70", "4×8@70", "4×8@75", "3×8@60", "4×8@75", "4×8@80", "4×8@80", "3×8@65", "4×10@60", "4×10@60", "4×10@60", "4×10@55"],
 "Russian Twists":["3×20@15","3×20@15","3×20@20","2×15@10","3×20@20","3×20@20","3×20@25","2×15@15","3×20@25","3×20@25","3×20@25","2×15@20","3×20@30","3×20@30","3×20@30","2×15@20","3×20@30","3×20@35","3×20@35","2×15@25","3×20@35","3×20@35","3×20@40","2×15@25","3×20@30","3×20@30","3×20@30","3×20@25"],
 "Deadlift":["3×6@215","3×6@220","3×6@225","3×4@200","3×5@230","3×5@235","3×5@240","3×4@215","3×5@245","3×5@250","3×5@255","3×4@230","3×4@260","3×4@265","3×4@270","3×3@245","3×3@275","3×3@280","3×3@285","3×3@255","2×3@290","2×3@295","2×2@300","3×4@265","3×5@265","3×5@270","3×5@265","3×5@255"],
-"Overhead Press":["3×8@85","3×8@90","3×8@95","3×6@80","3×8@95","3×8@100","3×8@105","3×6@90","4×6@105","4×6@110","4×6@115","3×6@100","4×5@115","4×5@120","4×5@125","3×5@110","4×4@125","4×4@130","4×4@135","3×4@115","3×3@135","3×3@140","3×3@145","3×5@120","3×6@120","3×6@125","3×6@120","3×6@115"],
+"Overhead Press":["3×8@70","3×8@75","3×8@80","3×6@65","3×8@80","3×8@85","3×8@90","3×6@75","4×6@90","4×6@95","4×6@100","3×6@85","4×5@100","4×5@105","4×5@110","3×5@95","4×4@110","4×4@115","4×4@120","3×4@100","3×3@120","3×3@125","3×3@130","3×5@105","3×6@105","3×6@110","3×6@105","3×6@100"],
 "Lat Pulldown":["3×10@100","3×10@105","3×10@110","3×8@95","3×10@110","3×10@115","3×10@120","3×8@100","4×8@120","4×8@125","4×8@130","3×8@110","4×8@130","4×8@135","4×8@140","3×8@120","4×6@140","4×6@145","4×6@150","3×6@130","3×6@150","3×6@155","3×6@160","3×8@135","3×8@135","3×8@140","3×8@135","3×8@130"],
 "DB Lat Raises":["3×12@10ea","3×12@12ea","3×12@12ea","3×10@10ea","3×12@12ea","3×12@15ea","3×12@15ea","3×10@10ea","3×12@15ea","3×12@15ea","3×12@15ea","3×10@12ea","3×12@15ea","3×12@20ea","3×12@20ea","3×10@15ea","3×10@20ea","3×10@20ea","3×10@25ea","3×10@15ea","3×10@25ea","3×10@25ea","3×10@25ea","3×12@20ea","3×12@20ea","3×12@20ea","3×12@20ea","3×12@15ea"],
 "Face Pulls":["3×15@30","3×15@30","3×15@35","2×12@25","3×15@35","3×15@35","3×15@40","2×12@30","3×15@40","3×15@40","4×15@40","2×12@35","4×15@45","4×15@45","4×15@45","3×12@35","4×15@45","4×15@50","4×15@50","3×12@40","4×15@50","4×15@50","4×15@55","3×12@40","3×15@45","3×15@45","3×15@45","3×15@45"],
-"Hanging Leg Raise":["3×10","3×10","3×12","2×8","3×12","3×12","3×15","2×10","3×15","3×15","3×15","2×12","3×15","3×15","3×15","2×12","3×15","3×15","3×15","2×10","3×15","3×15","3×15","2×12","3×15","3×15","3×15","3×12"]
+"Hanging Leg Raise":["3×10","3×10","3×12","2×8","3×12","3×12","3×15","2×10","3×15","3×15","3×15","2×12","3×15","3×15","3×15","2×12","3×15","3×15","3×15","2×10","3×15","3×15","3×15","2×12","3×15","3×15","3×15","3×12"],
+"Close-Grip Bench Press":["3×8@105", "3×8@110", "3×8@115", "3×8@95", "3×8@115", "3×8@120", "3×8@125", "3×8@105", "3×6@130", "3×6@135", "3×6@140", "3×6@120", "3×6@140", "3×6@145", "3×6@150", "3×6@130", "3×6@150", "3×6@155", "3×6@160", "3×6@140", "3×5@165", "3×5@170", "3×5@175", "3×5@150", "3×6@160", "3×6@165", "3×6@160", "3×8@150"],
+"Decline Weighted Sit-up":["3×12@10", "3×12@10", "3×12@15", "3×10@10", "3×12@15", "3×12@20", "3×12@20", "3×10@15", "3×12@25", "3×12@25", "3×12@30", "3×10@20", "3×12@30", "3×12@35", "3×12@35", "3×10@25", "3×12@40", "3×12@40", "3×12@45", "3×10@30", "3×10@45", "3×10@50", "3×10@50", "3×10@35", "3×12@35", "3×12@40", "3×12@40", "3×12@30"],
+"Leg Press (Machine)":["3×12@250", "3×12@270", "3×12@290", "3×10@230", "3×12@290", "3×12@310", "3×12@330", "3×10@270", "3×10@340", "3×10@360", "3×10@380", "3×8@320", "3×10@380", "3×10@400", "3×10@420", "3×8@350", "3×8@420", "3×8@440", "3×8@460", "3×8@390", "3×8@460", "3×8@480", "3×8@500", "3×8@410", "3×10@420", "3×10@440", "3×10@420", "3×12@380"],
+"Leg Curl (Machine)":["3×12@80", "3×12@90", "3×12@100", "3×10@70", "3×12@100", "3×12@110", "3×12@120", "3×10@90", "3×10@120", "3×10@130", "3×10@135", "3×8@110", "3×10@135", "3×10@140", "3×10@145", "3×8@120", "3×10@145", "3×10@150", "3×10@155", "3×8@130", "3×8@155", "3×8@160", "3×8@165", "3×8@135", "3×10@145", "3×10@150", "3×10@145", "3×12@130"]
 };
 const MEALS=[{meal:"Breakfast",items:[{food:"Morning Latte",amount:"1 cup milk + 1 tbsp syrup + 2 scoops collagen",cal:258,p:22,c:25,f:8},{food:"Oats",amount:"60g dry (~2/3 cup)",cal:225,p:8,c:40,f:4},{food:"Eggs",amount:"3 large",cal:210,p:18,c:2,f:15}]},{meal:"Lunch",items:[{food:"Chicken Breast",amount:"6 oz cooked",cal:280,p:53,c:0,f:6},{food:"White Rice",amount:"250g cooked",cal:255,p:5,c:56,f:1},{food:"Broccoli",amount:"1 cup",cal:55,p:4,c:11,f:1}]},{meal:"Snack",items:[{food:"Greek Yogurt",amount:"1 cup (227g)",cal:130,p:23,c:9,f:0},{food:"Apple",amount:"1 medium",cal:95,p:1,c:25,f:0}]},{meal:"Dinner",items:[{food:"85% Ground Beef",amount:"5 oz cooked",cal:300,p:30,c:0,f:19},{food:"Sweet Potato",amount:"1 medium",cal:130,p:2,c:30,f:0},{food:"Green Beans",amount:"1 cup",cal:34,p:2,c:8,f:0}]},{meal:"Protein Hit",items:[{food:"Prime Protein Chocolate",amount:"1 scoop + water",cal:100,p:21,c:2,f:1}]}];
-const GROCERY=[{cat:"Proteins",items:[{n:"Chicken Breast",q:"2.5 lbs"},{n:"85% Ground Beef",q:"2.2 lbs"},{n:"Eggs",q:"2 dozen"},{n:"Safe Catch Tuna",q:"2-3 cans"},{n:"Amylu Sausage",q:"1 pack"}]},{cat:"Dairy & Supps",items:[{n:"Greek Yogurt",q:"2 large tubs"},{n:"Whole Milk",q:"1 gallon"},{n:"Further Food Collagen",q:"1 bag/8wk"},{n:"Prime Protein Choc",q:"1 tub/mo"}]},{cat:"Grains",items:[{n:"Oats",q:"1 canister"},{n:"White Rice",q:"5 lb bag"},{n:"Sweet Potatoes",q:"7"},{n:"Russet Potatoes",q:"3-4"}]},{cat:"Fruits",items:[{n:"Apples",q:"7"},{n:"Oranges",q:"4-5"},{n:"Frozen Berries",q:"1 bag"}]},{cat:"Veggies",items:[{n:"Broccoli",q:"2 heads"},{n:"Green Beans",q:"1 lb"},{n:"Carrots",q:"1 bag"},{n:"Peas",q:"1 bag"}]},{cat:"Pantry",items:[{n:"Maple Syrup",q:"1 bottle"},{n:"Seasonings",q:"stocked"},{n:"Cooking Spray",q:"1 can"}]}];
+const GROCERY=[{"cat": "Proteins", "items": [{"n": "Chicken Breast", "q": "2.5 lbs"}, {"n": "85% Ground Beef", "q": "2.2 lbs"}, {"n": "Eggs", "q": "21 (1.5 dozen)"}]}, {"cat": "Dairy & Supps", "items": [{"n": "Greek Yogurt", "q": "1-2 large tubs"}, {"n": "Whole Milk", "q": "1/2 gallon"}, {"n": "Further Food Collagen", "q": "1 bag/8wk"}, {"n": "Prime Protein Choc", "q": "1 tub/mo"}]}, {"cat": "Grains", "items": [{"n": "Oats", "q": "1 canister"}, {"n": "White Rice", "q": "5 lb bag"}, {"n": "Sweet Potatoes", "q": "7"}]}, {"cat": "Fruits", "items": [{"n": "Apples", "q": "7"}]}, {"cat": "Veggies", "items": [{"n": "Broccoli", "q": "2 heads / 2 bags"}, {"n": "Green Beans", "q": "1 lb / 2 bags"}]}, {"cat": "Pantry", "items": [{"n": "Maple Syrup", "q": "1 bottle"}, {"n": "Seasonings", "q": "stocked"}, {"n": "Cooking Spray", "q": "1 can"}]}];
+const PREP_A=["Cook 2.5 lbs chicken breast for the week's lunches — season with salt, pepper, garlic powder; bake at 425°F for 22-25 min.", "Cook a big pot of white rice (5-6 cups dry); store in portioned containers.", "Brown 1.5 lbs ground beef; season; portion into 5 oz servings for dinners.", "Roast a sheet pan of broccoli + green beans at 400°F for ~20 min (4-5 days' worth).", "Bake or microwave sweet potatoes in bulk — they keep ~5 days in the fridge.", "Hard-boil a dozen eggs, or scramble fresh each morning (3 min).", "Pre-portion Greek yogurt into containers if buying the big tub.", "Keep frozen berries stocked for smoothie days — no prep needed."];
+const MEALS_B=[{"meal": "Breakfast", "items": [{"food": "Morning Latte", "amount": "1 cup milk + 1 tbsp syrup + 2 scoops collagen", "cal": 258, "p": 22, "c": 25, "f": 8}, {"food": "Oats", "amount": "60g dry (~2/3 cup)", "cal": 225, "p": 8, "c": 40, "f": 4}, {"food": "Amylu Andouille Sausage", "amount": "2 links", "cal": 280, "p": 28, "c": 8, "f": 14}]}, {"meal": "Lunch", "items": [{"food": "Safe Catch Tuna", "amount": "1 can (5 oz)", "cal": 160, "p": 34, "c": 0, "f": 2}, {"food": "White Rice", "amount": "250g cooked", "cal": 255, "p": 5, "c": 56, "f": 1}, {"food": "Green Beans", "amount": "1 cup", "cal": 34, "p": 2, "c": 8, "f": 0}]}, {"meal": "Snack", "items": [{"food": "Greek Yogurt", "amount": "1 cup (227g)", "cal": 130, "p": 23, "c": 9, "f": 0}, {"food": "Clementines", "amount": "2 small", "cal": 70, "p": 1, "c": 18, "f": 0}]}, {"meal": "Dinner", "items": [{"food": "Chicken Breast", "amount": "5 oz cooked", "cal": 233, "p": 44, "c": 0, "f": 5}, {"food": "Sweet Potato", "amount": "1 medium", "cal": 130, "p": 2, "c": 30, "f": 0}, {"food": "Broccoli", "amount": "1 cup", "cal": 55, "p": 4, "c": 11, "f": 1}]}, {"meal": "Protein Hit", "items": [{"food": "Prime Protein + 1/2 cup milk", "amount": "1 scoop + 1/2 cup whole milk", "cal": 175, "p": 25, "c": 8, "f": 5}]}];
+const GROCERY_B=[{"cat": "Proteins", "items": [{"n": "Chicken Breast", "q": "2.2 lbs"}, {"n": "Safe Catch Tuna", "q": "7 cans"}, {"n": "Amylu Andouille Sausage", "q": "14 links"}]}, {"cat": "Dairy & Supps", "items": [{"n": "Greek Yogurt", "q": "1-2 large tubs"}, {"n": "Whole Milk", "q": "3/4 gallon"}, {"n": "Further Food Collagen", "q": "1 bag/8wk"}, {"n": "Prime Protein Choc", "q": "1 tub/mo"}]}, {"cat": "Grains", "items": [{"n": "Oats", "q": "1 canister"}, {"n": "White Rice", "q": "5 lb bag"}, {"n": "Sweet Potatoes", "q": "7"}]}, {"cat": "Fruits", "items": [{"n": "Clementines", "q": "14"}]}, {"cat": "Veggies", "items": [{"n": "Green Beans", "q": "1 lb / 2 bags"}, {"n": "Broccoli", "q": "2 heads / 2 bags"}]}, {"cat": "Pantry", "items": [{"n": "Maple Syrup", "q": "1 bottle"}, {"n": "Seasonings", "q": "stocked"}, {"n": "Cooking Spray", "q": "1 can"}]}];
+const PREP_B=["Cook ~2.2 lbs chicken breast for dinners — salt, pepper, garlic powder; bake 425°F for 22-25 min; portion 5-6 oz.", "Cook a big pot of white rice (4-5 cups dry); portion for lunches.", "Cook the Amylu sausage links in batches (pan or air fryer, 8-10 min); refrigerate and reheat at breakfast.", "Lunch protein is no-cook — keep Safe Catch tuna cans stocked and just drain before eating.", "Roast broccoli and steam green beans for the week (400°F, ~20 min).", "Bake or microwave sweet potatoes in bulk.", "Pre-portion Greek yogurt; keep a bowl of clementines out for grab-and-go.", "Pre-measure oats into jars for fast breakfasts."];
+const MEALS_C=[{"meal": "Breakfast", "items": [{"food": "Morning Latte", "amount": "1 cup milk + 1 tbsp syrup + 2 scoops collagen", "cal": 258, "p": 22, "c": 25, "f": 8}, {"food": "Greek Yogurt", "amount": "1 cup (227g)", "cal": 130, "p": 23, "c": 9, "f": 0}, {"food": "Frozen Berries", "amount": "1 cup", "cal": 70, "p": 1, "c": 17, "f": 1}]}, {"meal": "Lunch", "items": [{"food": "85% Ground Beef", "amount": "5 oz cooked", "cal": 300, "p": 30, "c": 0, "f": 19}, {"food": "Russet Potato", "amount": "1 medium", "cal": 160, "p": 4, "c": 37, "f": 0}, {"food": "Peas", "amount": "1 cup", "cal": 118, "p": 8, "c": 21, "f": 1}]}, {"meal": "Snack", "items": [{"food": "Eggs", "amount": "2 hard-boiled", "cal": 140, "p": 12, "c": 1, "f": 10}, {"food": "Apple", "amount": "1 medium", "cal": 95, "p": 1, "c": 25, "f": 0}]}, {"meal": "Dinner", "items": [{"food": "Chicken Breast", "amount": "6 oz cooked", "cal": 280, "p": 53, "c": 0, "f": 6}, {"food": "White Rice", "amount": "250g cooked", "cal": 255, "p": 5, "c": 56, "f": 1}, {"food": "Broccoli", "amount": "1 cup", "cal": 55, "p": 4, "c": 11, "f": 1}]}, {"meal": "Protein Hit", "items": [{"food": "Prime Protein + 1/2 cup milk", "amount": "1 scoop + 1/2 cup whole milk", "cal": 175, "p": 25, "c": 8, "f": 5}]}];
+const GROCERY_C=[{"cat": "Proteins", "items": [{"n": "85% Ground Beef", "q": "2.2 lbs"}, {"n": "Chicken Breast", "q": "2.5 lbs"}, {"n": "Eggs", "q": "14 (1 dozen + 2)"}]}, {"cat": "Dairy & Supps", "items": [{"n": "Greek Yogurt", "q": "1-2 large tubs"}, {"n": "Whole Milk", "q": "3/4 gallon"}, {"n": "Further Food Collagen", "q": "1 bag/8wk"}, {"n": "Prime Protein Choc", "q": "1 tub/mo"}]}, {"cat": "Grains", "items": [{"n": "White Rice", "q": "5 lb bag"}, {"n": "Russet Potatoes", "q": "7"}]}, {"cat": "Fruits", "items": [{"n": "Frozen Berries", "q": "1-2 bags"}, {"n": "Apples", "q": "7"}]}, {"cat": "Veggies", "items": [{"n": "Peas", "q": "2 bags frozen"}, {"n": "Broccoli", "q": "2 heads / 2 bags"}]}, {"cat": "Pantry", "items": [{"n": "Maple Syrup", "q": "1 bottle"}, {"n": "Seasonings", "q": "stocked"}, {"n": "Cooking Spray", "q": "1 can"}]}];
+const PREP_C=["Brown ~2.2 lbs ground beef for lunches; season; portion into 5 oz servings.", "Cook ~2.5 lbs chicken breast for dinners — bake 425°F for 22-25 min; portion 6 oz.", "Cook a big pot of white rice; microwave russet potatoes in bulk (~5 min each).", "Hard-boil a dozen eggs for snacks; peel and store in the fridge.", "Steam or microwave peas and roast broccoli for the week.", "Pre-portion Greek yogurt into containers; keep frozen berries stocked for breakfast bowls.", "Wash apples and keep them visible for easy snacking.", "Pre-scoop Prime Protein servings into bags or a shaker for quick shakes."];
+const PLANS=[{id:'A',name:'Plan A · Classic',meals:MEALS,grocery:GROCERY,prep:PREP_A},{id:'B',name:'Plan B · Tuna + Sausage',meals:MEALS_B,grocery:GROCERY_B,prep:PREP_B},{id:'C',name:'Plan C · Beef + Eggs',meals:MEALS_C,grocery:GROCERY_C,prep:PREP_C}];
 const DEFAULT_STRETCHES=[{name:"Cat-Cow",dur:"1 min",sec:60,desc:"Inhale arch, exhale round. 8-10 cycles."},{name:"World's Greatest Stretch",dur:"2 min",sec:120,desc:"Lunge, plant hand, rotate to ceiling. 3-4/side."},{name:"Hip Flexor Stretch",dur:"2 min",sec:120,desc:"Half-kneeling, push hips forward. 45s/side."},{name:"Thoracic Rotation",dur:"1 min",sec:60,desc:"Side-lying, knees 90°, rotate top arm. 30s/side."},{name:"Chest Doorway Stretch",dur:"1 min",sec:60,desc:"Forearm on frame, step through. 30s/side."},{name:"Hamstring Stretch",dur:"1.5 min",sec:90,desc:"Foot on surface, hinge with flat back. 45s/side."},{name:"Child's Pose + Lat Reach",dur:"1.5 min",sec:90,desc:"Knees wide, sit back, walk hands each side."}];
 
 const CATEGORIES=["Chest","Back","Shoulders","Arms","Legs","Core","Cardio","Other"];
@@ -244,17 +256,21 @@ const DEFAULT_EXTRA=[
 {name:"Battle Ropes",cat:"Cardio",type:"time",metrics:[],target:"5 min",notes:{m:"Shoulders, Arms, Core, Cardiovascular",e:"Battle Ropes",h:"1) Hold an end in each hand in an athletic stance. 2) Whip the ropes—alternating or together. 3) Keep a steady rhythm in short bursts.",t:"Keep your core braced and knees soft. Great for intervals (e.g., 30s on / 30s off). Log total work time."}}
 ];
 const DEFAULT_TEMPLATES=[
-{id:"tA",name:"Day A: Squat & Pull",ex:["Back Squat","Pull-ups","T-bar Row","DB Lunges","Calf Raises","Ab Wheel"]},
+{id:"tA",name:"Day A: Squat & Pull",ex:["Back Squat","Pull-ups","T-bar Row","DB Lunges","Close-Grip Bench Press","Decline Weighted Sit-up"]},
 {id:"tB",name:"Day B: Bench & Back",ex:["Bench Press","Pull-ups","Barbell Row","DB Chest Flys","Triceps Press","Russian Twists"]},
-{id:"tC",name:"Day C: Deadlift & Press",ex:["Deadlift","Overhead Press","Lat Pulldown","DB Lat Raises","Face Pulls","Hanging Leg Raise"]}
+{id:"tC",name:"Day C: Legs & Press",ex:["Leg Press (Machine)","Overhead Press","Leg Curl (Machine)","Lat Pulldown","DB Lat Raises","Face Pulls","Hanging Leg Raise"]}
 ];
 
+const DEFAULT_VISION="Family Values\n\n1. Overflow: We will live from a state of abundance inherently and by choice.\n2. Creation: We will enjoy the Creator's beauty and mirror his creative heart.\n3. Team: We work together, celebrate together, play together, and grow together.\n4. Radical Responsibility: We will own our choices and circumstances.\n5. Vitality: We will pursue those things that give true life.";
 const S={get(k,d){try{const v=localStorage.getItem('bt_'+k);return v?JSON.parse(v):d}catch(e){return d}},set(k,v){try{localStorage.setItem('bt_'+k,JSON.stringify(v))}catch(e){}}};
 if(!S.get('launchDate'))S.set('launchDate',td());
 // Seed editable collections once
 if(!S.get('library'))S.set('library',DEFAULT_LIBRARY.concat(DEFAULT_CARDIO).concat(DEFAULT_EXTRA).map(function(e,i){return{id:'e'+i,name:e.name,cat:e.cat,type:e.type||(e.weighted?'weight':'reps'),metrics:e.metrics||[],target:e.target,notes:e.notes||GLOSSARY[e.name]||null,weighted:(e.type||'weight')==='weight'}}));
 if(!S.get('stretches'))S.set('stretches',DEFAULT_STRETCHES.map(function(s,i){return{id:'s'+i,name:s.name,dur:s.dur,sec:s.sec,desc:s.desc}}));
 if(!S.get('templates'))S.set('templates',DEFAULT_TEMPLATES);
+if(!S.get('gtgSeeded')){var _hb=S.get('habits',[]);if(!_hb.some(function(x){return x.name==='Grease the Groove Pull-ups'})){_hb.push({id:'h'+Date.now(),name:'Grease the Groove Pull-ups',cadence:'daily',notes:'A few easy, sub-failure pull-ups through the day (~40-50% of max). Never to failure.',created:td()});S.set('habits',_hb)}S.set('gtgSeeded',1);}
+if(!S.get('declineSeeded')){var _lb=S.get('library',[]);if(!_lb.some(function(x){return x.name==='Decline Weighted Sit-up'})){_lb.push({id:'x_dws',name:'Decline Weighted Sit-up',cat:'Core',type:'weight',metrics:[],target:'3×12@25',notes:{m:'Abs, Hip Flexors',e:'Decline Bench + Plate',h:'1) Hook your legs on a decline bench and hold a plate at your chest. 2) Lower your torso back with control. 3) Curl up by flexing the abs. 4) Lower slowly.',t:'Lead with the abs, not your neck or arms. Control the descent each rep. Bump the plate up as the reps get easy.'},weighted:true});S.set('library',_lb)}S.set('declineSeeded',1);}
+if(!S.get('visionSeeded')){if(!S.get('vision'))S.set('vision',DEFAULT_VISION);S.set('visionSeeded',1);}
 // Migrations for libraries seeded before notes/type/cardio existed
 (function(){var lib=S.get('library',[]);var changed=false;
   lib.forEach(function(e){
@@ -601,25 +617,30 @@ function renderSetEditor(){
     });
     h+='<button class="btn btn-outline btn-sm" style="width:100%;margin:6px 0 12px" onclick="seAdd()">+ Add Set</button>';
   }
-  h+='<div class="flex gap8"><button class="btn btn-primary" style="flex:1" onclick="seSave()">Save</button><button class="btn btn-outline" style="flex:1" onclick="closeM()">Cancel</button></div>';
+  h+='<div style="font-size:11px;color:var(--text2);margin-bottom:8px;text-align:center">Sets save automatically \u2014 check the box on the card to mark complete</div>';h+='<button class="btn btn-primary" style="width:100%" onclick="seDone()">Done</button>';
   mc.innerHTML=h;document.getElementById('editModal').classList.add('show');
 }
-function seUpd(i,field,val){if(!EDIT||!EDIT.sets[i])return;EDIT.sets[i][field]=val===''?0:+val}
-function seAdd(){var last=EDIT.sets[EDIT.sets.length-1]||{};EDIT.sets.push(Object.assign({},last));renderSetEditor()}
-function seDel(i){EDIT.sets.splice(i,1);renderSetEditor()}
-function seSave(){
+function seSync(){
+  if(!EDIT)return;
   var sets;
   if(EDIT.type==='time'){sets=EDIT.sets.filter(function(s){return (s.dur&&s.dur>0)||(s.dist&&s.dist>0)||(s.speed&&s.speed>0)||(s.wt&&s.wt>0)})}
   else{sets=EDIT.sets.filter(function(s){return (s.reps&&s.reps>0)||(s.wt&&s.wt>0)})}
   if(EDIT.mode==='program'){
     var data=wG(EDIT.w,EDIT.d);var rec=data[EDIT.ex]||{};
-    rec.sets=sets;rec.done=true;rec.date=td();
-    data[EDIT.ex]=rec;wS(EDIT.w,EDIT.d,data);checkForPR(EDIT.ex,rec);
+    rec.sets=sets;if(!rec.date)rec.date=td();
+    data[EDIT.ex]=rec;wS(EDIT.w,EDIT.d,data);
   }else{
-    var sess=S.get('activeTSession',null);if(sess){if(!sess.log[EDIT.ex])sess.log[EDIT.ex]={};sess.log[EDIT.ex].sets=sets;sess.log[EDIT.ex].done=true;S.set('activeTSession',sess);checkForPR(EDIT.ex,sess.log[EDIT.ex])}
+    var sess=S.get('activeTSession',null);if(sess){if(!sess.log[EDIT.ex])sess.log[EDIT.ex]={};sess.log[EDIT.ex].sets=sets;S.set('activeTSession',sess)}
   }
-  var _t=EDIT.type,_ex=EDIT.ex;EDIT=null;closeM();render();
-  if(_t!=='time')startTmr(S.get('restDefault',120),_ex);
+}
+function seUpd(i,field,val){if(!EDIT||!EDIT.sets[i])return;EDIT.sets[i][field]=val===''?0:+val;seSync()}
+function seAdd(){var last=EDIT.sets[EDIT.sets.length-1]||{};EDIT.sets.push(Object.assign({},last));seSync();renderSetEditor()}
+function seDel(i){EDIT.sets.splice(i,1);seSync();renderSetEditor()}
+function seDone(){
+  seSync();
+  var _t=EDIT?EDIT.type:'';var _ex=EDIT?EDIT.ex:'';
+  EDIT=null;closeM();render();
+  if(_t&&_t!=='time')startTmr(S.get('restDefault',120),_ex);
 }
 
 // ═══════════ PROGRAM ACTIONS ═══════════
@@ -648,14 +669,36 @@ function restPreset(sec){S.set('restDefault',sec);startTmr(sec)}
 
 // ═══════════ MEALS ═══════════
 function rMeals(el){
-  let sub=S.get('mSub','plan');
-  let h=`<h1>Meals</h1><div class="sub-tabs"><button class="sub-tab ${sub==='plan'?'active':''}" onclick="S.set('mSub','plan');render()">Daily Plan</button><button class="sub-tab ${sub==='smoothie'?'active':''}" onclick="S.set('mSub','smoothie');render()">Smoothie</button><button class="sub-tab ${sub==='grocery'?'active':''}" onclick="S.set('mSub','grocery');render()">Grocery</button></div>`;
-  if(sub==='plan'){let tc=0,tp=0,tca=0,tf=0;MEALS.forEach(m=>{h+=`<h3>${m.meal}</h3><div class="card">`;m.items.forEach(it=>{tc+=it.cal;tp+=it.p;tca+=it.c;tf+=it.f;h+=`<div class="meal-item"><div><div class="meal-food">${it.food}</div><div class="meal-amount">${it.amount}</div></div><div class="meal-macros">${it.cal}cal<br><b>${it.p}P</b> ${it.c}C ${it.f}F</div></div>`});h+=`</div>`});h+=`<div class="card" style="background:rgba(79,195,247,.1);border:1px solid var(--accent)"><div class="flex between"><b style="color:#fff">Daily Totals</b><div style="text-align:right"><b style="color:var(--accent)">${tc} cal</b><br><span style="font-size:12px">${tp}P · ${tca}C · ${tf}F</span></div></div></div>`}
-  else if(sub==='smoothie'){h+=`<div class="card"><h3 style="margin-top:0">Smoothie Recipe</h3><p style="color:var(--text2);font-size:12px;margin-bottom:8px">Replaces Snack + Protein Hit</p>`;[{f:"Frozen Berries",a:"1 cup",m:"70cal 1P 17C 1F"},{f:"Greek Yogurt",a:"1/2 cup",m:"65cal 12P 5C 0F"},{f:"Whole Milk",a:"1/2 cup",m:"75cal 4P 6C 4F"},{f:"Prime Protein",a:"1 scoop",m:"100cal 21P 2C 1F"}].forEach(s=>{h+=`<div class="meal-item"><div><div class="meal-food">${s.f}</div><div class="meal-amount">${s.a}</div></div><div class="meal-macros">${s.m}</div></div>`});h+=`<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--accent)"><b style="color:var(--accent)">Total: 310cal | 38P · 30C · 6F</b></div></div>`}
-  else{const chk=S.get('gChk',{});h+=`<div class="flex between" style="margin-bottom:12px"><span></span><button class="btn btn-sm btn-outline" onclick="S.set('gChk',{});render()">Clear All</button></div>`;GROCERY.forEach(cat=>{h+=`<h3>${cat.cat}</h3>`;cat.items.forEach(it=>{const ck=chk[it.n];h+=`<div class="grocery-item ${ck?'checked-off':''}" onclick="togG('${it.n.replace(/'/g,"\\'")}')"><div class="check ${ck?'checked':''}">${ck?'✓':''}</div><div><div class="g-name">${it.n}</div><div class="g-qty">${it.q}</div></div></div>`})})}
+  var planId=S.get('mPlan','A');
+  var plan=PLANS.filter(function(p){return p.id===planId})[0]||PLANS[0];
+  var sub=S.get('mSub','plan');
+  var h='<h1>Meals</h1>';
+  h+='<div class="sub-tabs">';
+  PLANS.forEach(function(p){h+='<button class="sub-tab '+(p.id===planId?'active':'')+'" onclick="S.set(\'mPlan\',\''+p.id+'\');render()">'+p.name+'</button>';});
+  h+='</div><div class="sub-tabs">';
+  [['plan','Daily Plan'],['grocery','Grocery'],['prep','Prep Guide'],['smoothie','Smoothie']].forEach(function(t){h+='<button class="sub-tab '+(sub===t[0]?'active':'')+'" onclick="S.set(\'mSub\',\''+t[0]+'\');render()">'+t[1]+'</button>';});
+  h+='</div>';
+  if(sub==='plan'){
+    var tc=0,tp=0,tca=0,tf=0;
+    plan.meals.forEach(function(m){h+='<h3>'+m.meal+'</h3><div class="card">';m.items.forEach(function(it){tc+=it.cal;tp+=it.p;tca+=it.c;tf+=it.f;h+='<div class="meal-item"><div><div class="meal-food">'+it.food+'</div><div class="meal-amount">'+it.amount+'</div></div><div class="meal-macros">'+it.cal+'cal<br><b>'+it.p+'P</b> '+it.c+'C '+it.f+'F</div></div>';});h+='</div>';});
+    h+='<div class="card" style="background:rgba(79,195,247,.1);border:1px solid var(--accent)"><div class="flex between"><b style="color:#fff">Daily Totals</b><div style="text-align:right"><b style="color:var(--accent)">'+tc+' cal</b><br><span style="font-size:12px">'+tp+'P · '+tca+'C · '+tf+'F</span></div></div></div>';
+    h+='<div style="font-size:11px;color:var(--text2);margin-top:6px;text-align:center">Target: ~2,100 cal · 160-200g P · 175-215g C · &lt;80g F</div>';
+  } else if(sub==='grocery'){
+    var chk=S.get('gChk_'+planId,{});
+    h+='<div class="flex between" style="margin-bottom:12px"><span style="font-size:12px;color:var(--text2)">One week of '+plan.name+'</span><button class="btn btn-sm btn-outline" onclick="S.set(\'gChk_'+planId+'\',{});render()">Clear All</button></div>';
+    plan.grocery.forEach(function(cat){h+='<h3>'+cat.cat+'</h3>';cat.items.forEach(function(it){var ck=chk[it.n];h+='<div class="grocery-item '+(ck?'checked-off':'')+'" onclick="togG(\''+esc(it.n)+'\')"><div class="check '+(ck?'checked':'')+'">'+(ck?'✓':'')+'</div><div><div class="g-name">'+it.n+'</div><div class="g-qty">'+it.q+'</div></div></div>';});});
+  } else if(sub==='prep'){
+    h+='<h3>'+plan.name+' — Weekly Prep</h3><div class="card">';
+    plan.prep.forEach(function(step,i){h+='<div class="meal-item"><div class="flex gap8" style="align-items:flex-start"><b style="color:var(--accent);min-width:18px">'+(i+1)+'</b><div class="meal-food" style="font-weight:400;line-height:1.45">'+step+'</div></div></div>';});
+    h+='</div>';
+  } else {
+    h+='<div class="card"><h3 style="margin-top:0">Smoothie Recipe</h3><p style="color:var(--text2);font-size:12px;margin-bottom:8px">Replaces Snack + Protein Hit on any plan</p>';
+    [{f:"Frozen Berries",a:"1 cup",m:"70cal 1P 17C 1F"},{f:"Greek Yogurt",a:"1/2 cup",m:"65cal 12P 5C 0F"},{f:"Whole Milk",a:"1/2 cup",m:"75cal 4P 6C 4F"},{f:"Prime Protein",a:"1 scoop",m:"100cal 21P 2C 1F"}].forEach(function(s){h+='<div class="meal-item"><div><div class="meal-food">'+s.f+'</div><div class="meal-amount">'+s.a+'</div></div><div class="meal-macros">'+s.m+'</div></div>';});
+    h+='<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--accent)"><b style="color:var(--accent)">Total: 310cal | 38P · 30C · 6F</b></div></div>';
+  }
   el.innerHTML=h;
 }
-function togG(name){var chk=S.get('gChk',{});chk[name]=!chk[name];S.set('gChk',chk);render()}
+function togG(name){var plan=S.get('mPlan','A');var chk=S.get('gChk_'+plan,{});chk[name]=!chk[name];S.set('gChk_'+plan,chk);render();}
 
 // ═══════════ PROGRESS ═══════════
 function rProg(el){
@@ -1163,7 +1206,7 @@ function openSet(){
   mc.innerHTML=h;document.getElementById('editModal').classList.add('show');
 }
 
-document.getElementById('editModal').addEventListener('click',function(e){if(e.target===this)closeM()});
+document.getElementById('editModal').addEventListener('click',function(e){if(e.target===this){if(EDIT){seSync();EDIT=null;render()}closeM()}});
 render();
 
 </script>
