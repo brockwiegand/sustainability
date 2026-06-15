@@ -84,6 +84,8 @@ select.chart-select{background:var(--card);color:var(--text);border:1px solid va
 .set-row{display:flex;align-items:center;gap:6px;margin-bottom:6px}
 .set-row .set-num{color:var(--text2);font-size:12px;font-weight:600;min-width:28px}
 .set-row .del-set{width:24px;height:24px;border-radius:50%;border:1px solid var(--border);background:none;color:var(--red);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.set-dot{width:26px;height:26px;border-radius:7px;border:1px solid var(--border);background:var(--card2);color:var(--text2);font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
+.set-dot.checked{background:var(--green);border-color:var(--green);color:#000}
 .sets-logged{font-size:11px;color:var(--green);margin-top:3px;line-height:1.4}
 .session-timer{background:var(--card2);border-radius:8px;padding:8px 14px;font-size:13px;color:var(--accent);font-variant-numeric:tabular-nums;text-align:center;margin-bottom:12px}
 .backup-banner{background:rgba(255,213,84,.15);border:1px solid rgba(255,213,84,.3);border-radius:10px;padding:10px 14px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;gap:8px}
@@ -304,7 +306,9 @@ if(!S.get('visionSeeded')){if(!S.get('vision'))S.set('vision',DEFAULT_VISION);S.
 let cTab='workout',cWeek=S.get('cWeek',1),cDay='A',tInt=null,tSec=0;
 let EDIT=null;   // active set-editor context
 let TBUILD=null; // active template builder context
-function td(){return new Date().toISOString().slice(0,10)}
+function td(){return dstr(effNow())}
+function dstr(d){return d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2)}
+function effNow(){var tz=S.get('tz','auto');if(!tz||tz==='auto')return new Date();try{var p=new Intl.DateTimeFormat('en-US',{timeZone:tz,year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false}).formatToParts(new Date());var o={};p.forEach(function(x){o[x.type]=x.value});var hh=(o.hour==='24')?'0':o.hour;return new Date(+o.year,+o.month-1,+o.day,+hh,+o.minute,+o.second)}catch(e){return new Date()}}
 function dBet(a,b){return Math.floor((new Date(b)-new Date(a))/864e5)}
 function esc(s){return String(s==null?'':s).replace(/\\/g,'\\\\').replace(/'/g,"\\'")}
 function escA(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
@@ -402,7 +406,7 @@ function getHist(exName){
   pts.sort(function(a,b){return a.sortKey<b.sortKey?-1:a.sortKey>b.sortKey?1:0});
   return pts;
 }
-function addDays(dateStr,n){var d=new Date(dateStr);d.setDate(d.getDate()+n);return d.toISOString().slice(0,10)}
+function addDays(dateStr,n){var d=new Date(dateStr+"T00:00:00");d.setDate(d.getDate()+n);return dstr(d)}
 function mdLabel(dateStr){var d=new Date(dateStr);return(d.getMonth()+1)+'/'+d.getDate()}
 
 // ═══════════ CHARTS ═══════════
@@ -421,8 +425,9 @@ function drawLine(id,pts,yKey,color,unit){
   if(pts.length<=20){ctx.fillStyle='#9E9E9E';ctx.font='9px sans-serif';ctx.textAlign='center';pts.forEach((p,i)=>{ctx.fillText(p.label,pad+step*i,h-bp+12)})}},50)}
 
 // ═══════════ TABS ═══════════
-function switchTab(t){cTab=t;closeMenu();render()}
-function render(){var a=document.getElementById('app');a.scrollTop=0;var map={workout:rWork,meals:rMeals,progress:rProg,vision:rVision,library:rLibrary,habits:rHabits,tasks:rTasks,settings:rSettings,backup:rBackup};(map[cTab]||rWork)(a);var tt=document.getElementById('topTitle');if(tt)tt.textContent=({workout:'Workout',meals:'Meals',progress:'Progress',vision:'Vision',library:'Library',habits:'Habits',tasks:'Tasks',settings:'Settings',backup:'Backup'}[cTab]||'Sustainability');updateTaskBadge()}
+function switchTab(t){cTab=t;closeMenu();_toTop=true;render()}
+var _toTop=false;
+function render(){var a=document.getElementById('app');var keep=a?a.scrollTop:0;var map={workout:rWork,meals:rMeals,progress:rProg,vision:rVision,library:rLibrary,habits:rHabits,tasks:rTasks,settings:rSettings,backup:rBackup};(map[cTab]||rWork)(a);var tt=document.getElementById('topTitle');if(tt)tt.textContent=({workout:'Workout',meals:'Meals',progress:'Progress',vision:'Vision',library:'Library',habits:'Habits',tasks:'Tasks',settings:'Settings',backup:'Backup'}[cTab]||'Sustainability');if(a)a.scrollTop=_toTop?0:keep;_toTop=false;updateTaskBadge()}
 
 // ═══════════ WORKOUT (Program | Templates) ═══════════
 function setWMode(m){S.set('workoutMode',m);render()}
@@ -479,7 +484,7 @@ function rProgram(el){
   di.ex.forEach((ex,i)=>{
     const target=getT(ex,d,w),rec=wd[ex]||{},done=rec.done,isMain=i<2;
     const hasSets=rec.sets&&rec.sets.length;
-    h+=`<div class="card ${done?'done':''} ${target.includes('TEST')?'test':''}"><div class="flex between"><div style="flex:1;min-width:0"><div class="ex-name" onclick="showNotes('${esc(ex)}')" style="cursor:pointer">${ex} <span style="font-size:11px;color:var(--text2)">ⓘ</span></div><div class="ex-target">Target: ${target}</div>${hasSets?`<div class="sets-logged">${fmtSetLine(ex,rec.sets)}</div>`:''}</div><div class="flex gap4"><button class="btn-icon" onclick="editEx('${esc(ex)}','${d}',${w})" style="width:30px;height:30px;font-size:13px">✏️</button><button class="btn-icon" onclick="startTmr(${isMain?150:75},'${esc(ex)}')" style="width:30px;height:30px;font-size:13px">⏱️</button><div class="check ${done?'checked':''}" onclick="togEx('${esc(ex)}','${d}',${w})">${done?'✓':''}</div></div></div></div>`});
+    h+=`<div class="card ${done?'done':''} ${target.includes('TEST')?'test':''}"><div class="flex between"><div style="flex:1;min-width:0"><div class="ex-name" onclick="showNotes('${esc(ex)}')" style="cursor:pointer">${ex} <span style="font-size:11px;color:var(--text2)">ⓘ</span></div><div class="ex-target">Target: ${target}</div>${hasSets?`<div class="sets-logged">${fmtSetLine(ex,rec.sets)}</div>`:''}${setDotsHTML(rec,target,`togSet('${esc(ex)}','${d}',${w},`)}</div><div class="flex gap4"><button class="btn-icon" onclick="editEx('${esc(ex)}','${d}',${w})" style="width:30px;height:30px;font-size:13px">✏️</button><button class="btn-icon" onclick="startTmr(${isMain?150:75},'${esc(ex)}')" style="width:30px;height:30px;font-size:13px">⏱️</button><div class="check ${done?'checked':''}" onclick="togEx('${esc(ex)}','${d}',${w})">${done?'✓':''}</div></div></div></div>`});
   const allDone=di.ex.every(ex=>wd[ex]?.done);
   h+=`<div style="text-align:center;margin-top:16px">${allDone?'<span class="pill pill-green" style="font-size:14px;padding:8px 20px">✓ Workout Complete!</span>':''}</div>`;
   el.innerHTML=h;
@@ -510,7 +515,7 @@ function rActiveTemplate(el,sess){
   sess.ex.forEach(function(ex,i){
     const rec=(sess.log&&sess.log[ex])||{};const done=rec.done;const hasSets=rec.sets&&rec.sets.length;
     const target=libTarget(ex);const isMain=i<2;
-    h+=`<div class="card ${done?'done':''}"><div class="flex between"><div style="flex:1;min-width:0"><div class="ex-name" onclick="showNotes('${esc(ex)}')" style="cursor:pointer">${ex} <span style="font-size:11px;color:var(--text2)">ⓘ</span></div>${target?`<div class="ex-target">Target: ${target}</div>`:''}${hasSets?`<div class="sets-logged">${fmtSetLine(ex,rec.sets)}</div>`:''}</div><div class="flex gap4"><button class="btn-icon" onclick="editTEx('${esc(ex)}')" style="width:30px;height:30px;font-size:13px">✏️</button><button class="btn-icon" onclick="startTmr(${isMain?150:75},'${esc(ex)}')" style="width:30px;height:30px;font-size:13px">⏱️</button><div class="check ${done?'checked':''}" onclick="togTEx('${esc(ex)}')">${done?'✓':''}</div></div></div></div>`;
+    h+=`<div class="card ${done?'done':''}"><div class="flex between"><div style="flex:1;min-width:0"><div class="ex-name" onclick="showNotes('${esc(ex)}')" style="cursor:pointer">${ex} <span style="font-size:11px;color:var(--text2)">ⓘ</span></div>${target?`<div class="ex-target">Target: ${target}</div>`:''}${hasSets?`<div class="sets-logged">${fmtSetLine(ex,rec.sets)}</div>`:''}${setDotsHTML(rec,target,`togTSet('${esc(ex)}',`)}</div><div class="flex gap4"><button class="btn-icon" onclick="editTEx('${esc(ex)}')" style="width:30px;height:30px;font-size:13px">✏️</button><button class="btn-icon" onclick="startTmr(${isMain?150:75},'${esc(ex)}')" style="width:30px;height:30px;font-size:13px">⏱️</button><div class="check ${done?'checked':''}" onclick="togTEx('${esc(ex)}')">${done?'✓':''}</div></div></div></div>`;
   });
   const allDone=sess.ex.length&&sess.ex.every(function(ex){return (sess.log&&sess.log[ex]&&sess.log[ex].done)});
   h+=`<div style="text-align:center;margin-top:14px">${allDone?'<span class="pill pill-green" style="font-size:14px;padding:8px 20px">✓ All exercises done!</span>':''}</div>`;
@@ -566,8 +571,9 @@ function startTemplateWorkout(id){
 function togTEx(ex){
   var sess=S.get('activeTSession',null);if(!sess)return;
   if(!sess.log[ex])sess.log[ex]={};
-  sess.log[ex].done=!sess.log[ex].done;
-  if(sess.log[ex].done&&sess.log[ex].sets&&sess.log[ex].sets.length)checkForPR(ex,sess.log[ex]);
+  var rec=sess.log[ex];rec.done=!rec.done;
+  var sc=(rec.sets&&rec.sets.length)?rec.sets.length:(pSets(libTarget(ex))||1);
+  if(rec.done){rec.setsDone=[];for(var k=0;k<sc;k++)rec.setsDone[k]=true;if(rec.sets&&rec.sets.length)checkForPR(ex,rec)}else{rec.setsDone=[]}
   S.set('activeTSession',sess);render();
 }
 function editTEx(ex){
@@ -657,11 +663,33 @@ function seDone(){
 function togEx(ex,d,w){
   var data=wG(w,d);var rec=data[ex]||{};
   rec.done=!rec.done;
-  if(rec.done){rec.date=td();if(rec.sets&&rec.sets.length)checkForPR(ex,rec)}
+  var sc=(rec.sets&&rec.sets.length)?rec.sets.length:(pSets(getT(ex,d,w))||1);
+  if(rec.done){rec.setsDone=[];for(var k=0;k<sc;k++)rec.setsDone[k]=true;rec.date=td();if(rec.sets&&rec.sets.length)checkForPR(ex,rec)}else{rec.setsDone=[]}
   data[ex]=rec;wS(w,d,data);render();
 }
 function chgW(delta){cWeek=Math.min(28,Math.max(1,cWeek+delta));S.set('cWeek',cWeek);render()}
 
+function setDotsHTML(rec,target,onPrefix){
+  var sc=(rec&&rec.sets&&rec.sets.length)?rec.sets.length:(pSets(target)||1);if(sc<1)sc=1;
+  var sd=(rec&&rec.setsDone)||[];
+  var h='<div class="flex gap4" style="margin-top:7px;flex-wrap:wrap;align-items:center"><span style="font-size:11px;color:var(--text2);margin-right:2px">Sets</span>';
+  for(var i=0;i<sc;i++){h+='<div class="set-dot '+(sd[i]?'checked':'')+'" onclick="'+onPrefix+i+')">'+(sd[i]?'✓':(i+1))+'</div>';}
+  return h+'</div>';
+}
+function togSet(ex,d,w,i){
+  var data=wG(w,d);var rec=data[ex]||{};rec.setsDone=rec.setsDone||[];rec.setsDone[i]=!rec.setsDone[i];
+  var sc=(rec.sets&&rec.sets.length)?rec.sets.length:(pSets(getT(ex,d,w))||1);
+  var all=sc>0;for(var k=0;k<sc;k++){if(!rec.setsDone[k]){all=false;break}}
+  rec.done=all;if(all){rec.date=td();if(rec.sets&&rec.sets.length)checkForPR(ex,rec)}
+  data[ex]=rec;wS(w,d,data);render();
+}
+function togTSet(ex,i){
+  var sess=S.get('activeTSession',null);if(!sess)return;var rec=sess.log[ex]||{};rec.setsDone=rec.setsDone||[];rec.setsDone[i]=!rec.setsDone[i];
+  var sc=(rec.sets&&rec.sets.length)?rec.sets.length:(pSets(libTarget(ex))||1);
+  var all=sc>0;for(var k=0;k<sc;k++){if(!rec.setsDone[k]){all=false;break}}
+  rec.done=all;if(all&&rec.sets&&rec.sets.length)checkForPR(ex,rec);
+  sess.log[ex]=rec;S.set('activeTSession',sess);render();
+}
 // ═══════════ REST TIMER ═══════════
 function fmtT(s){var m=Math.floor(s/60);var r=s%60;return m+':'+(r<10?'0':'')+r}
 function startTmr(sec,label){
@@ -767,15 +795,15 @@ function waterSectionHTML(){
   return h;
 }
 function drawWaterCharts(){
-  var labels=[],vals=[];var d=new Date();for(var i=13;i>=0;i--){var dt=new Date(d);dt.setDate(dt.getDate()-i);var ds=dt.toISOString().slice(0,10);labels.push(ds.slice(5));vals.push(S.get('hyd_'+ds,0))}
+  var labels=[],vals=[];var d=effNow();for(var i=13;i>=0;i--){var dt=new Date(d);dt.setDate(dt.getDate()-i);var ds=dstr(dt);labels.push(ds.slice(5));vals.push(S.get('hyd_'+ds,0))}
   drawBar('h2oChart',labels,vals,'#4FC3F7',160);
   var launch=S.get('launchDate',td());var bwWeeks=[],bwWeekLabels=[];
   var totalWeeks=Math.ceil((dBet(launch,td())+1)/7);
   for(var bww=0;bww<totalWeeks;bww++){
     var weekVals=[];
     for(var bwd2=0;bwd2<7;bwd2++){
-      var dayOff=bww*7+bwd2;var dt3=new Date(launch);dt3.setDate(dt3.getDate()+dayOff);
-      var ds3=dt3.toISOString().slice(0,10);var v3=S.get('bw_'+ds3,null);
+      var dayOff=bww*7+bwd2;var dt3=new Date(launch+"T00:00:00");dt3.setDate(dt3.getDate()+dayOff);
+      var ds3=dstr(dt3);var v3=S.get('bw_'+ds3,null);
       if(v3!==null)weekVals.push(v3);
     }
     if(weekVals.length>0){var avg=Math.round(weekVals.reduce(function(a,b){return a+b},0)/weekVals.length*10)/10;bwWeeks.push(avg);bwWeekLabels.push('Wk'+(bww+1))}
@@ -869,8 +897,8 @@ function deleteExercise(id){
 function rLibStretches(){
   var stretches=getStretches();
   var chk=S.get('str_'+td(),[]);
-  var launch=S.get('launchDate',td());var totD=dBet(launch,td())+1;var doneD=0;var dd=new Date(launch);
-  for(var i=0;i<totD;i++){var ds=dd.toISOString().slice(0,10);var sc=S.get('str_'+ds,[]);if(stretches.length&&stretches.every(function(_,j){return sc[j]}))doneD++;dd.setDate(dd.getDate()+1)}
+  var launch=S.get('launchDate',td());var totD=dBet(launch,td())+1;var doneD=0;var dd=new Date(launch+"T00:00:00");
+  for(var i=0;i<totD;i++){var ds=dstr(dd);var sc=S.get('str_'+ds,[]);if(stretches.length&&stretches.every(function(_,j){return sc[j]}))doneD++;dd.setDate(dd.getDate()+1)}
   var comp=totD>0?Math.round(doneD/totD*100):0;
   var allD=stretches.length&&stretches.every(function(_,i){return chk[i]});
   var h='<div class="card" style="text-align:center"><div class="stat-num">'+comp+'%</div><div class="stat-label">Daily compliance ('+doneD+'/'+totD+' days)</div><div class="progress-bar" style="height:10px;margin:8px 20px"><div class="progress-fill" style="width:'+comp+'%;background:var(--green)"></div></div></div>';
@@ -987,11 +1015,11 @@ function archiveHabit(i){var habits=S.get('habits',[]);if(habits[i]){habits[i].a
 function unarchiveHabit(i){var habits=S.get('habits',[]);if(habits[i]){habits[i].archived=false;S.set('habits',habits);render()}}
 
 function getHabitPeriodKey(hab,date){
-  var d=new Date(date);
+  var d=new Date(date+"T00:00:00");
   if(hab.cadence==='daily')return date;
   if(hab.cadence==='weekly'){
     var day=d.getDay();var diff=d.getDate()-day+(day===0?-6:1);
-    var mon=new Date(d);mon.setDate(diff);return mon.toISOString().slice(0,10);
+    var mon=new Date(d);mon.setDate(diff);return dstr(mon);
   }
   if(hab.cadence==='monthly')return d.getFullYear()+'-'+(d.getMonth()+1<10?'0':'')+(d.getMonth()+1);
   if(hab.cadence==='quarterly'){var q=Math.floor(d.getMonth()/3)+1;return d.getFullYear()+'-Q'+q}
@@ -1019,12 +1047,12 @@ function getHabitCompliance(hab){
   return Math.round(done/periods.length*100);
 }
 function getPeriodsFromDate(cadence,startDate){
-  var periods=[];var now=new Date();var d=new Date(startDate);
+  var periods=[];var now=effNow();var d=new Date(startDate+"T00:00:00");
   if(cadence==='daily'){
-    while(d<=now){periods.push(d.toISOString().slice(0,10));d.setDate(d.getDate()+1)}
+    while(d<=now){periods.push(dstr(d));d.setDate(d.getDate()+1)}
   } else if(cadence==='weekly'){
     var day=d.getDay();var diff=d.getDate()-day+(day===0?-6:1);d.setDate(diff);
-    while(d<=now){periods.push(d.toISOString().slice(0,10));d.setDate(d.getDate()+7)}
+    while(d<=now){periods.push(dstr(d));d.setDate(d.getDate()+7)}
   } else if(cadence==='monthly'){
     d.setDate(1);
     while(d<=now){periods.push(d.getFullYear()+'-'+(d.getMonth()+1<10?'0':'')+(d.getMonth()+1));d.setMonth(d.getMonth()+1)}
@@ -1039,12 +1067,12 @@ function getHabitChartData(hab){
   var created=hab.created||S.get('launchDate',td());
   var labels=[],values=[];
   if(hab.cadence==='daily'){
-    var start=new Date(created);var now=new Date();
+    var start=new Date(created+"T00:00:00");var now=effNow();
     var weekNum=0;
     while(start<=now){
       var weekDone=0,weekTotal=0;
       for(var wd=0;wd<7&&start<=now;wd++){
-        var ds=start.toISOString().slice(0,10);weekTotal++;if(log[ds])weekDone++;
+        var ds=dstr(start);weekTotal++;if(log[ds])weekDone++;
         start.setDate(start.getDate()+1);
       }
       weekNum++;if(weekTotal>0){labels.push('Wk'+weekNum);values.push(Math.round(weekDone/weekTotal*100))}
@@ -1114,8 +1142,13 @@ function renderMenu(){
   document.getElementById('menu').innerHTML=h;
 }
 function rSettings(el){
+  var tz=S.get('tz','auto');var detected='';try{detected=Intl.DateTimeFormat().resolvedOptions().timeZone||''}catch(e){}
+  var zs=[['auto','Automatic (device)'],['America/New_York','Eastern (New York)'],['America/Chicago','Central (Chicago)'],['America/Denver','Mountain (Denver)'],['America/Phoenix','Arizona (Phoenix)'],['America/Los_Angeles','Pacific (Los Angeles)'],['America/Anchorage','Alaska'],['Pacific/Honolulu','Hawaii'],['Europe/London','UK (London)'],['UTC','UTC']];
   var h='<h1>Settings</h1>';
   h+='<div class="card"><div class="flex between" style="padding:4px 0"><span>Current Week</span><div class="flex gap8"><button class="btn btn-sm btn-outline" onclick="cWeek=Math.max(1,cWeek-1);S.set(\'cWeek\',cWeek);render()">-</button><span style="min-width:40px;text-align:center;font-weight:600">'+cWeek+'</span><button class="btn btn-sm btn-outline" onclick="cWeek=Math.min(28,cWeek+1);S.set(\'cWeek\',cWeek);render()">+</button></div></div></div>';
+  h+='<div class="card"><div class="flex between" style="margin-bottom:8px"><span>Time Zone</span><span style="font-size:11px;color:var(--text2)">'+(tz==='auto'?('Auto'+(detected?' \u00b7 '+detected:'')):tz)+'</span></div><select class="input" style="margin:0" onchange="S.set(\'tz\',this.value);render()">';
+  zs.forEach(function(z){h+='<option value="'+z[0]+'"'+(tz===z[0]?' selected':'')+'>'+z[1]+'</option>'});
+  h+='</select><div style="font-size:11px;color:var(--text2);margin-top:6px">Sets when your day rolls over (resets hydration, stretches, daily habits). Auto uses your device.</div></div>';
   h+='<div class="card"><div class="flex between"><span>Launch Date</span><span style="color:var(--accent)">'+S.get('launchDate',td())+'</span></div></div>';
   h+='<div class="card"><div class="flex between"><span style="color:var(--red)">Reset All Data</span><button class="btn btn-sm btn-outline" style="color:var(--red)" onclick="if(confirm(\'Delete ALL data? This cannot be undone.\')){Object.keys(localStorage).filter(function(k){return k.startsWith(\'bt_\')}).forEach(function(k){localStorage.removeItem(k)});location.reload()}">Reset</button></div></div>';
   el.innerHTML=h;
@@ -1150,7 +1183,7 @@ function addTaskInterval(dateStr,recur){
   else if(recur==='monthly')d.setMonth(d.getMonth()+1);
   else if(recur==='quarterly')d.setMonth(d.getMonth()+3);
   else if(recur==='annually')d.setFullYear(d.getFullYear()+1);
-  return d.toISOString().slice(0,10);
+  return dstr(d);
 }
 function rTasks(el){
   var tasks=getTasks();tasks.forEach(function(t,i){t._i=i});
@@ -1305,7 +1338,7 @@ function getWeekRecap(){
   var workouts=0,totalVol=0,waterTotal=0,waterDays=0,stretchDays=0;
   var stretches=getStretches();
   for(var i=0;i<7;i++){
-    var d2=new Date();d2.setDate(d2.getDate()-i);var ds=d2.toISOString().slice(0,10);
+    var d2=effNow();d2.setDate(d2.getDate()-i);var ds=dstr(d2);
     var w=S.get('hyd_'+ds,0);if(w>0){waterTotal+=w;waterDays++}
     var sc=S.get('str_'+ds,[]);if(stretches.length&&stretches.every(function(_,j){return sc[j]}))stretchDays++;
   }
