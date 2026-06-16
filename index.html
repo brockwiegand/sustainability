@@ -380,6 +380,30 @@ function showNotes(name){
 }
 
 // Get exercise history with volume — aggregates PROGRAM days + TEMPLATE sessions by name.
+function fmtLast(sets,type){
+  if(!sets||!sets.length)return'';
+  if(type==='time')return sets.map(function(s){var p=[];if(s.dur)p.push(s.dur+'min');if(s.dist)p.push(s.dist+'mi');if(s.speed)p.push(s.speed+'mph');if(s.wt)p.push(s.wt+'lb');return p.join(' ')||'\u2014'}).join(', ');
+  if(type==='reps')return sets.map(function(s){return (s.reps||0)+(s.wt?'@'+s.wt:'')}).join(', ');
+  return sets.map(function(s){return (s.wt?s.wt+'\u00d7':'')+(s.reps||0)}).join(', ');
+}
+function lastLog(exName,exclMode,exclW,exclD){
+  var best=null;var D=['A','B','C'];
+  for(var w=1;w<=28;w++){for(var di=0;di<3;di++){var d=D[di];
+    if(exclMode==='program'&&w===exclW&&d===exclD)continue;
+    if(!DAYS[d].ex.includes(exName))continue;
+    var rec=wG(w,d)[exName];
+    if(rec&&rec.sets&&rec.sets.length){var dt=rec.date||'';if(!best||dt>=best.date)best={date:dt,sets:rec.sets,type:exType(exName)};}
+  }}
+  getTSessions().forEach(function(s){
+    var rec=s.log&&s.log[exName];
+    if(rec&&rec.sets&&rec.sets.length){if(!best||(s.date||'')>=best.date)best={date:s.date||'',sets:rec.sets,type:exType(exName)};}
+  });
+  return best;
+}
+function lastLineHTML(ll){
+  if(!ll||!ll.sets||!ll.sets.length)return'';
+  return '<div style="font-size:11px;color:var(--text2);margin-top:3px">Last: '+fmtLast(ll.sets,ll.type)+(ll.date?' <span style="opacity:.65">('+fmtDue(ll.date)+')</span>':'')+'</div>';
+}
 function getHist(exName){
   const pts=[];const launch=S.get('launchDate',td());const t=exType(exName);
   // Program logs (strength only)
@@ -484,7 +508,7 @@ function rProgram(el){
   di.ex.forEach((ex,i)=>{
     const target=getT(ex,d,w),rec=wd[ex]||{},done=rec.done,isMain=i<2;
     const hasSets=rec.sets&&rec.sets.length;
-    h+=`<div class="card ${done?'done':''} ${target.includes('TEST')?'test':''}"><div class="flex between"><div style="flex:1;min-width:0"><div class="ex-name" onclick="showNotes('${esc(ex)}')" style="cursor:pointer">${ex} <span style="font-size:11px;color:var(--text2)">ⓘ</span></div><div class="ex-target">Target: ${target}</div>${hasSets?`<div class="sets-logged">${fmtSetLine(ex,rec.sets)}</div>`:''}${setDotsHTML(rec,target,`togSet('${esc(ex)}','${d}',${w},`)}</div><div class="flex gap4"><button class="btn-icon" onclick="editEx('${esc(ex)}','${d}',${w})" style="width:30px;height:30px;font-size:13px">✏️</button><button class="btn-icon" onclick="startTmr(${isMain?150:75},'${esc(ex)}')" style="width:30px;height:30px;font-size:13px">⏱️</button><div class="check ${done?'checked':''}" onclick="togEx('${esc(ex)}','${d}',${w})">${done?'✓':''}</div></div></div></div>`});
+    h+=`<div class="card ${done?'done':''} ${target.includes('TEST')?'test':''}"><div class="flex between"><div style="flex:1;min-width:0"><div class="ex-name" onclick="showNotes('${esc(ex)}')" style="cursor:pointer">${ex} <span style="font-size:11px;color:var(--text2)">ⓘ</span></div><div class="ex-target">Target: ${target}</div>${lastLineHTML(lastLog(ex,'program',w,d))}${hasSets?`<div class="sets-logged">${fmtSetLine(ex,rec.sets)}</div>`:''}${setDotsHTML(rec,target,`togSet('${esc(ex)}','${d}',${w},`)}</div><div class="flex gap4"><button class="btn-icon" onclick="editEx('${esc(ex)}','${d}',${w})" style="width:30px;height:30px;font-size:13px">✏️</button><button class="btn-icon" onclick="startTmr(${isMain?150:75},'${esc(ex)}')" style="width:30px;height:30px;font-size:13px">⏱️</button><div class="check ${done?'checked':''}" onclick="togEx('${esc(ex)}','${d}',${w})">${done?'✓':''}</div></div></div></div>`});
   const allDone=di.ex.every(ex=>wd[ex]?.done);
   h+=`<div style="text-align:center;margin-top:16px">${allDone?'<span class="pill pill-green" style="font-size:14px;padding:8px 20px">✓ Workout Complete!</span>':''}</div>`;
   el.innerHTML=h;
@@ -515,7 +539,7 @@ function rActiveTemplate(el,sess){
   sess.ex.forEach(function(ex,i){
     const rec=(sess.log&&sess.log[ex])||{};const done=rec.done;const hasSets=rec.sets&&rec.sets.length;
     const target=libTarget(ex);const isMain=i<2;
-    h+=`<div class="card ${done?'done':''}"><div class="flex between"><div style="flex:1;min-width:0"><div class="ex-name" onclick="showNotes('${esc(ex)}')" style="cursor:pointer">${ex} <span style="font-size:11px;color:var(--text2)">ⓘ</span></div>${target?`<div class="ex-target">Target: ${target}</div>`:''}${hasSets?`<div class="sets-logged">${fmtSetLine(ex,rec.sets)}</div>`:''}${setDotsHTML(rec,target,`togTSet('${esc(ex)}',`)}</div><div class="flex gap4"><button class="btn-icon" onclick="editTEx('${esc(ex)}')" style="width:30px;height:30px;font-size:13px">✏️</button><button class="btn-icon" onclick="startTmr(${isMain?150:75},'${esc(ex)}')" style="width:30px;height:30px;font-size:13px">⏱️</button><div class="check ${done?'checked':''}" onclick="togTEx('${esc(ex)}')">${done?'✓':''}</div></div></div></div>`;
+    h+=`<div class="card ${done?'done':''}"><div class="flex between"><div style="flex:1;min-width:0"><div class="ex-name" onclick="showNotes('${esc(ex)}')" style="cursor:pointer">${ex} <span style="font-size:11px;color:var(--text2)">ⓘ</span></div>${target?`<div class="ex-target">Target: ${target}</div>`:''}${lastLineHTML(lastLog(ex,'template'))}${hasSets?`<div class="sets-logged">${fmtSetLine(ex,rec.sets)}</div>`:''}${setDotsHTML(rec,target,`togTSet('${esc(ex)}',`)}</div><div class="flex gap4"><button class="btn-icon" onclick="editTEx('${esc(ex)}')" style="width:30px;height:30px;font-size:13px">✏️</button><button class="btn-icon" onclick="startTmr(${isMain?150:75},'${esc(ex)}')" style="width:30px;height:30px;font-size:13px">⏱️</button><div class="check ${done?'checked':''}" onclick="togTEx('${esc(ex)}')">${done?'✓':''}</div></div></div></div>`;
   });
   const allDone=sess.ex.length&&sess.ex.every(function(ex){return (sess.log&&sess.log[ex]&&sess.log[ex].done)});
   h+=`<div style="text-align:center;margin-top:14px">${allDone?'<span class="pill pill-green" style="font-size:14px;padding:8px 20px">✓ All exercises done!</span>':''}</div>`;
